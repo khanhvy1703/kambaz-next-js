@@ -1,7 +1,5 @@
 "use client";
 
-import Image from "next/image";
-
 export default function Lab1() {
   return (
     <div id="wd-lab1">
@@ -23,10 +21,7 @@ export default function Lab1() {
       </div>
       <div id="wd-p-tag">
         <h4>Paragraph Tag</h4>
-        <p id="wd-p-1">
-          Don&apos;t forget that paragraphs should be wrapped with &lt;p&gt;
-          tags.
-        </p>
+        <p id="wd-p-1"> ... </p>
         <p id="wd-p-2">
           This is the first paragraph. The paragraph tag is used to format
           vertical gaps between long pieces of text like this one.
@@ -68,7 +63,7 @@ export default function Lab1() {
         <ul id="wd-my-books">
           <li>Dune</li>
           <li>Lord of the Rings</li>
-          <li>Ender&apos;s Game</li>
+          <li>Ender's Game</li>
           <li>Red Mars</li>
           <li>The Forever War</li>
         </ul>
@@ -165,23 +160,15 @@ export default function Lab1() {
       <div id="wd-images">
         <h4>Image tag</h4>
         Loading an image from the internet: <br />
-        <Image
+        <img
           id="wd-starship"
+          width="400px"
           src="https://www.staradvertiser.com/wp-content/uploads/2021/08/web1_Starship-gap2.jpg"
-          alt="Starship rocket"
-          width={400}
-          height={250}
         />
         <br />
         Loading a local image:
         <br />
-        <Image
-          id="wd-teslabot"
-          src="/images/teslabot.jpg"
-          alt="Tesla Bot"
-          width={200}
-          height={300}
-        />
+        <img id="wd-teslabot" src="/images/teslabot.jpg" height="200px" />
       </div>
 
       <div id="wd-forms">
@@ -237,7 +224,6 @@ export default function Lab1() {
           <input type="date" value="2000-01-21" id="wd-text-fields-dob" />
           <br />
         </form>
-
         <h5>Text boxes</h5>
         <label>Biography:</label>
         <br />
@@ -250,7 +236,6 @@ export default function Lab1() {
           pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
           culpa qui officia deserunt mollit anim id est laborum.
         </textarea>
-
         <h5 id="wd-buttons">Buttons</h5>
         <button
           type="button"
@@ -259,7 +244,6 @@ export default function Lab1() {
         >
           Hello World!
         </button>
-
         <h5 id="wd-radio-buttons">Radio buttons</h5>
         <label>Favorite movie genre:</label>
         <br />
@@ -274,7 +258,6 @@ export default function Lab1() {
         <br />
         <input type="radio" name="radio-genre" id="wd-radio-fantasy" />
         <label htmlFor="wd-radio-fantasy">Fantasy</label>
-
         <h5 id="wd-checkboxes">Checkboxes</h5>
         <label>Favorite movie genre:</label>
         <br />
@@ -289,7 +272,6 @@ export default function Lab1() {
         <br />
         <input type="checkbox" name="check-genre" id="wd-chkbox-fantasy" />
         <label htmlFor="wd-chkbox-fantasy">Fantasy</label>
-
         <h4 id="wd-dropdowns">Dropdowns</h4>
         <h5>Select one</h5>
         <label htmlFor="wd-select-one-genre"> Favorite movie genre: </label>
@@ -302,19 +284,20 @@ export default function Lab1() {
           </option>
           <option value="FANTASY">Fantasy</option>
         </select>
-
         <h5>Select many</h5>
         <label htmlFor="wd-select-many-genre"> Favorite movie genres: </label>
         <br />
         <select multiple id="wd-select-many-genre">
           <option value="COMEDY" selected>
-            Comedy
+            {" "}
+            Comedy{" "}
           </option>
-          <option value="DRAMA">Drama</option>
+          <option value="DRAMA"> Drama </option>
           <option value="SCIFI" selected>
-            Science Fiction
+            {" "}
+            Science Fiction{" "}
           </option>
-          <option value="FANTASY">Fantasy</option>
+          <option value="FANTASY"> Fantasy </option>
         </select>
       </div>
 
@@ -327,7 +310,10 @@ export default function Lab1() {
         to get dummy text
         <br />
         Visit my{" "}
-        <a href="https://github.com/khanhvy1703/kambaz-next-js" id="wd-github">
+        <a
+          href="https://github.khoury.northeastern.edu/khanhvy1703/webdev-lab1"
+          id="wd-github"
+        >
           GitHub
         </a>
       </div>
