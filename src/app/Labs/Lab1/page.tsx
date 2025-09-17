@@ -195,7 +195,7 @@ export default function Lab1() {
         <br />
         Visit my{" "}
         <a
-          href="https://github.khoury.northeastern.edu/khanhvy1703/webdev-lab1"
+          href="https://github.com/khanhvy1703/kambaz-next-js"
           id="wd-github"
         >
           GitHub
