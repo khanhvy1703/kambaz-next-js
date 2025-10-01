@@ -1,118 +1,188 @@
+"use client";
+
+import { Form, Button, Row, Col } from "react-bootstrap";
+
 export default function AssignmentEditor() {
   return (
-    <div id="wd-assignments-editor">
-      <label htmlFor="wd-name">Assignment Name</label>
-      <input id="wd-name" value="A1 - ENV + HTML" />
-      <br />
-      <br />
-      <label htmlFor="wd-description">Description</label>
-      <textarea id="wd-description">
-        The assignment is available online. Submit a link to the landing page of
-        your application.
-      </textarea>
-      <br />
+    <div id="wd-assignments-editor" className="p-3">
+      <Form>
+        <Form.Group className="mb-3">
+          <Form.Label>Assignment Name</Form.Label>
+          <Form.Control type="text" defaultValue="A1" />
+        </Form.Group>
 
-      <table>
-        <tr>
-          <td align="right" valign="top">
-            <label htmlFor="wd-points">Points</label>
-          </td>
-          <td>
-            <input id="wd-points" type="number" value={100} />
-          </td>
-        </tr>
-        <tr>
-          <td align="right" valign="top">
-            <label htmlFor="wd-group">Assignment Group</label>
-          </td>
-          <td>
-            <select id="wd-group">
-              <option>ASSIGNMENTS</option>
-              <option>QUIZZES</option>
-              <option>EXAMS</option>
-              <option>PROJECT</option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td align="right" valign="top">
-            <label htmlFor="wd-display-grade-as">Display Grade as</label>
-          </td>
-          <td>
-            <select id="wd-display-grade-as">
-              <option>Percentage</option>
-              <option>Points</option>
-              <option>Letter Grade</option>
-              <option>Complete/Incomplete</option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td align="right" valign="top">
-            <label htmlFor="wd-submission-type">Submission Type</label>
-          </td>
-          <td>
-            <select id="wd-submission-type">
-              <option>Online</option>
-              <option>On Paper</option>
-              <option>No Submission</option>
-            </select>
-            <br />
-            <label>
-              <input id="wd-text-entry" type="checkbox" /> Text Entry
-            </label>
-            <br />
-            <label>
-              <input id="wd-website-url" type="checkbox" /> Website URL
-            </label>
-            <br />
-            <label>
-              <input id="wd-media-recordings" type="checkbox" /> Media Recordings
-            </label>
-            <br />
-            <label>
-              <input id="wd-student-annotation" type="checkbox" /> Student Annotation
-            </label>
-            <br />
-            <label>
-              <input id="wd-file-upload" type="checkbox" /> File Uploads
-            </label>
-          </td>
-        </tr>
-        <tr>
-          <td align="right" valign="top">
-            <label htmlFor="wd-assign-to">Assign To</label>
-          </td>
-          <td>
-            <input id="wd-assign-to" value="Everyone" />
-          </td>
-        </tr>
-        <tr>
-          <td align="right" valign="top">
-            <label htmlFor="wd-due-date">Due Date</label>
-          </td>
-          <td>
-            <input id="wd-due-date" type="date" />
-          </td>
-        </tr>
-        <tr>
-          <td align="right" valign="top">
-            <label htmlFor="wd-available-from">Available From</label>
-          </td>
-          <td>
-            <input id="wd-available-from" type="date" />
-          </td>
-        </tr>
+        {/* Description */}
+        <Form.Group className="mb-3">
+          <Form.Label>Description</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={6}
+            defaultValue={`The assignment is available online. Submit a link to the landing page of your Web application running on Netlify.
 
-        <tr>
-          <td align="right" valign="top">
-            <label htmlFor="wd-available-until">Available Until</label>
-          </td>
-          <td>
-            <input id="wd-available-until" type="date" />
-          </td>
-        </tr>
-      </table>
+The landing page should include the following:
+• Your full name and section
+• Links to each of the lab assignments
+• Link to the Kanbas application
+• Links to all relevant source code repositories
+
+The Kanbas application should include a link to navigate back to the landing page.`}
+          />
+        </Form.Group>
+
+        <Row className="justify-content-end">
+          <Col sm={11}>
+            {/* Points */}
+            <Form.Group as={Row} className="mb-3">
+              <Form.Label column sm={1}>
+                Points
+              </Form.Label>
+              <Col sm={11}>
+                <Form.Control type="text" defaultValue={100} />
+              </Col>
+            </Form.Group>
+            {/* Assignment Group */}
+            <Form.Group as={Row} className="mb-3">
+              <Form.Label column sm={1}>
+                Assignment Group
+              </Form.Label>
+              <Col sm={11}>
+                <Form.Select defaultValue="ASSIGNMENTS">
+                  <option>ASSIGNMENTS</option>
+                  <option>QUIZZES</option>
+                  <option>EXAMS</option>
+                  <option>PROJECT</option>
+                </Form.Select>
+              </Col>
+            </Form.Group>
+            {/* Display Grade */}
+            <Form.Group as={Row} className="mb-3">
+              <Form.Label column sm={1}>
+                Display Grade as
+              </Form.Label>
+              <Col sm={11}>
+                <Form.Select defaultValue="Percentage">
+                  <option>Percentage</option>
+                  <option>Points</option>
+                  <option>Letter Grade</option>
+                  <option>Complete/Incomplete</option>
+                </Form.Select>
+              </Col>
+            </Form.Group>
+            {/* Submission Type */}{" "}
+            <Form.Group as={Row} className="mb-3">
+              <Form.Label column sm={1}>
+                Submission Type
+              </Form.Label>
+              <Col sm={11}>
+                <div className="mt-2 p-3 border rounded">
+                  <Form.Select defaultValue="Online">
+                    <option>Online</option>
+                    <option>On Paper</option>
+                    <option>No Submission</option>
+                  </Form.Select>
+                  <div className="mt-3">
+                    <strong>Online Entry Options</strong>
+                  </div>
+
+                  <div>
+                    <Form.Check
+                      className="mt-3"
+                      type="checkbox"
+                      label="Text Entry"
+                    />
+                    <Form.Check
+                      className="mt-3"
+                      type="checkbox"
+                      label="Website URL"
+                      defaultChecked
+                    />
+                    <Form.Check
+                      className="mt-3"
+                      type="checkbox"
+                      label="Media Recordings"
+                    />
+                    <Form.Check
+                      className="mt-3"
+                      type="checkbox"
+                      label="Student Annotation"
+                    />
+                    <Form.Check
+                      className="mt-3"
+                      type="checkbox"
+                      label="File Uploads"
+                    />
+                  </div>
+                </div>
+              </Col>
+            </Form.Group>
+            {/* Assign To */}
+            <Form.Group as={Row} className="mb-3">
+              <Form.Label column sm={1}>
+                Assign
+              </Form.Label>
+              <Col sm={11}>
+                <div className="mt-3 p-3 border rounded">
+                  <Form.Group as={Col} className="mb-3">
+                    <Form.Label column sm={3} className="fw-bold">
+                      Assign to
+                    </Form.Label>
+                    <Col sm={12}>
+                      <Form.Control type="text" defaultValue="Everyone" />
+                    </Col>
+                  </Form.Group>
+
+                  <Form.Group as={Col} className="mb-3">
+                    <Form.Label column sm={3} className="fw-bold">
+                      Due
+                    </Form.Label>
+                    <Col sm={12}>
+                      <Form.Control
+                        type="datetime-local"
+                        defaultValue="2024-05-13T23:59"
+                      />
+                    </Col>
+                  </Form.Group>
+
+                  <Row>
+                    <Col sm={6}>
+                      <Form.Group as={Col} className="mb-3">
+                        <Form.Label column sm={5} className="fw-bold">
+                          Available From
+                        </Form.Label>
+                        <Col sm={12}>
+                          <Form.Control
+                            type="datetime-local"
+                            defaultValue="2024-05-06T00:00"
+                          />
+                        </Col>
+                      </Form.Group>
+                    </Col>
+
+                    <Col sm={6}>
+                      <Form.Group as={Col} className="mb-3">
+                        <Form.Label column sm={3} className="fw-bold">
+                          Until
+                        </Form.Label>
+                        <Col sm={12}>
+                          <Form.Control type="datetime-local" defaultValue=""/>
+                        </Col>
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                </div>
+              </Col>
+            </Form.Group>
+          </Col>
+        </Row>
+
+        {/* Buttons */}
+        <div className="border-top pt-3 d-flex justify-content-end">
+          <Button variant="secondary" className="me-2">
+            Cancel
+          </Button>
+          <Button variant="danger">Save</Button>
+        </div>
+      </Form>
     </div>
   );
 }
