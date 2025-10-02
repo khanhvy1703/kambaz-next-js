@@ -138,7 +138,7 @@ The Kanbas application should include a link to navigate back to the landing pag
                     <Col sm={12}>
                       <Form.Control
                         type="datetime-local"
-                        defaultValue="2024-05-13T23:59"
+                        defaultValue="2024-05-13"
                       />
                     </Col>
                   </Form.Group>
@@ -152,7 +152,7 @@ The Kanbas application should include a link to navigate back to the landing pag
                         <Col sm={12}>
                           <Form.Control
                             type="datetime-local"
-                            defaultValue="2024-05-06T00:00"
+                            defaultValue="2024-05-06"
                           />
                         </Col>
                       </Form.Group>

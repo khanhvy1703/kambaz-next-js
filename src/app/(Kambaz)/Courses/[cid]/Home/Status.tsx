@@ -8,7 +8,7 @@ import { Button } from "react-bootstrap";
 
 export default function CourseStatus() {
   return (
-    <div id="wd-course-status" style={{ width: "350px" }}>
+    <div id="wd-course-status" style={{ width: "250px" }}>
       <h2>Course Status</h2>
 
       {/* Unpublish / Publish row */}
@@ -16,7 +16,7 @@ export default function CourseStatus() {
         <div className="w-50 pe-1">
           <Button
             variant="secondary"
-            size="lg"
+            size="sm"
             className="w-100 text-nowrap"
             id="wd-unpublish-btn"
           >
@@ -26,7 +26,7 @@ export default function CourseStatus() {
         <div className="w-50">
           <Button
             variant="success"
-            size="lg"
+            size="sm"
             className="w-100"
             id="wd-publish-btn"
           >
@@ -38,31 +38,31 @@ export default function CourseStatus() {
       <br />
 
       {/* Stacked buttons */}
-      <Button variant="secondary" size="lg" className="w-100 mt-1 text-start">
+      <Button variant="secondary" size="sm" className="w-100 mt-1 text-start">
         <BiImport className="me-2 fs-5" /> Import Existing Content
       </Button>
 
-      <Button variant="secondary" size="lg" className="w-100 mt-1 text-start">
+      <Button variant="secondary" size="sm" className="w-100 mt-1 text-start">
         <LiaFileImportSolid className="me-2 fs-5" /> Import from Commons
       </Button>
 
-      <Button variant="secondary" size="lg" className="w-100 mt-1 text-start">
+      <Button variant="secondary" size="sm" className="w-100 mt-1 text-start">
         <AiOutlineHome className="me-2 fs-5" /> Choose Home Page
       </Button>
 
-      <Button variant="secondary" size="lg" className="w-100 mt-1 text-start">
+      <Button variant="secondary" size="sm" className="w-100 mt-1 text-start">
         <BsMegaphone className="me-2 fs-5" /> New Announcement
       </Button>
 
-      <Button variant="secondary" size="lg" className="w-100 mt-1 text-start">
+      <Button variant="secondary" size="sm" className="w-100 mt-1 text-start">
         <FaChartBar className="me-2 fs-5" /> New Analytics
       </Button>
 
-      <Button variant="secondary" size="lg" className="w-100 mt-1 text-start">
+      <Button variant="secondary" size="sm" className="w-100 mt-1 text-start">
         <BsCalendar3 className="me-2 fs-5" /> View Course Calendar
       </Button>
 
-      <Button variant="secondary" size="lg" className="w-100 mt-1 text-start">
+      <Button variant="secondary" size="sm" className="w-100 mt-1 text-start">
         <FaBell className="me-2 fs-5" /> View Course Notifications
       </Button>
     </div>

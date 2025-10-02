@@ -17,9 +17,15 @@ export default function Signup() {
         type="password"
         className="mb-2"
       />
+      <FormControl
+        id="wd-verify-password"
+        placeholder="verify password"
+        type="password"
+        className="mb-2"
+      />
       <Link
         id="wd-signup-btn"
-        href="/Account/Signin"
+        href="/Account/Profile"
         className="btn btn-primary w-100 mb-2"
       >
         Signup
