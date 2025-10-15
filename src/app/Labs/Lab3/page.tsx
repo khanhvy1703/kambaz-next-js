@@ -1,3 +1,4 @@
+import Add from "./Add";
 import AddingAndRemovingToFromArrays from "./AddingAndRemovingToFromArrays";
 import ArrayIndexAndLength from "./ArrayIndexAndLength";
 import ArrowFunctions from "./ArrowFunctions";
@@ -20,17 +21,23 @@ import LegacyFunctions from "./LegacyFunctions";
 import MapFunction from "./MapFunction";
 import SimpleArrays from "./SimpleArrays";
 import Spreading from "./Spreader";
+import Square from "./Square";
+import Styles from "./Styles";
 import TemplateLiterals from "./TemplateLiterals";
 import TernaryOperator from "./TernaryOperator";
 import VariablesAndConstants from "./VariablesAndConstants";
 import VariableTypes from "./VariableTypes";
+import Highlight from "./Highlight";
+import PathParameters from "./PathParameters";
+import TodoList from "./todos/TodoList";
 
 export default function Lab3() {
-  return(
+  console.log('Hello World!');
+  return (
     <div id="wd-lab3">
       <h3>Lab 3</h3>
-      <VariablesAndConstants/>
-      <VariableTypes/>
+      <VariablesAndConstants />
+      <VariableTypes />
       <BooleanVariables />
       <IfElse />
       <TernaryOperator />
@@ -55,6 +62,19 @@ export default function Lab3() {
       <FunctionDestructing />
       <DestructingImports />
       <Classes />
+      <Styles />
+      <Add a={3} b={4} />
+      <h4>Square of 4</h4>
+      <Square>4</Square>
+      <hr />
+      <Highlight>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipitratione
+        eaque illo minus cum, saepe totam vel nihil repellat nemo explicabo
+        excepturi consectetur. Modi omnis minus sequi maiores, provident
+        voluptates.
+      </Highlight>
+      <PathParameters />
+      <TodoList />
     </div>
   );
 }
