@@ -8,15 +8,23 @@ import {
   ListGroupItem,
 } from "react-bootstrap";
 import { FaPlus, FaSearch, FaCheckCircle } from "react-icons/fa";
-import { BsGripVertical, BsPlus } from "react-icons/bs";
+import { BsGripVertical } from "react-icons/bs";
 import { IoEllipsisVertical } from "react-icons/io5";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { MdAssignment } from "react-icons/md";
 import Link from "next/link";
+import { useParams } from "next/navigation";
+import { assignments } from "../../../Database"; // ✅ use named import now
 
 export default function Assignments() {
+  const { cid } = useParams();
+
+  // Filter assignments for the current course
+  const courseAssignments = assignments.filter((a) => a.course === cid);
+
   return (
     <div id="wd-assignments-screen" className="p-3">
+      {/* --- Top Toolbar --- */}
       <div className="d-flex justify-content-between align-items-center mb-3">
         <InputGroup style={{ width: "250px" }}>
           <InputGroup.Text>
@@ -24,6 +32,7 @@ export default function Assignments() {
           </InputGroup.Text>
           <Form.Control placeholder="Search..." />
         </InputGroup>
+
         <div>
           <Button className="btn-group-custom me-2">
             <FaPlus className="me-1" /> Group
@@ -34,6 +43,7 @@ export default function Assignments() {
         </div>
       </div>
 
+      {/* --- Assignment Group Header --- */}
       <ListGroup className="rounded-0">
         <ListGroupItem className="p-3 fs-6 bg-light fw-bold d-flex justify-content-between align-items-center">
           <div className="d-flex align-items-center">
@@ -50,89 +60,61 @@ export default function Assignments() {
           </span>
         </ListGroupItem>
 
-        {/* A1 */}
-        <ListGroupItem className="assignment-item p-3 d-flex justify-content-between align-items-center">
-          <div className="d-flex align-items-center">
-            <BsGripVertical className="me-2 fs-5" />
-            <MdAssignment className="text-success me-2 fs-4" />
-            <div>
-              <Link
-                href="/Courses/1234/Assignments/1"
-                className="fw-bold text-dark text-decoration-none"
-              >
-                A1
-              </Link>
-              <div className="small">
-                <span className="text-danger fw-bold">Multiple Modules</span> |{" "}
-                <span className="fw-bold text-muted">Not available until</span>{" "}
-                <span className="text-muted">May 6 at 12:00am</span> |{" "}
-                <span className="fw-bold text-muted">Due</span>{" "}
-                <span className="text-muted"> May 13 at 11:59pm</span> |{" "}
-                <span className="text-muted">100 pts</span>
-              </div>
-            </div>
-          </div>
-          <div className="text-nowrap">
-            <FaCheckCircle className="text-success me-3" />
-            <IoEllipsisVertical className="fs-4" />
-          </div>
-        </ListGroupItem>
+        {/* --- Dynamic Assignment Items --- */}
+        {courseAssignments.map((a) => (
+          <ListGroupItem
+            key={a._id}
+            className="assignment-item p-3 d-flex justify-content-between align-items-center"
+          >
+            <div className="d-flex align-items-center">
+              <BsGripVertical className="me-2 fs-5" />
+              <MdAssignment className="text-success me-2 fs-4" />
 
-        {/* A2 */}
-        <ListGroupItem className="assignment-item p-3 d-flex justify-content-between align-items-center">
-          <div className="d-flex align-items-center">
-            <BsGripVertical className="me-2 fs-5" />
-            <MdAssignment className="text-success me-2 fs-4" />
-            <div>
-              <Link
-                href="/Courses/1234/Assignments/2"
-                className="fw-bold text-dark text-decoration-none"
-              >
-                A2
-              </Link>
-              <div className="small">
-                <span className="text-danger fw-bold">Multiple Modules</span> |{" "}
-                <span className="fw-bold text-muted">Not available until</span>{" "}
-                <span className="text-muted">May 13 at 12:00am</span> |{" "}
-                <span className="fw-bold text-muted">Due</span>{" "}
-                <span className="text-muted"> May 20 at 11:59pm</span> |{" "}
-                <span className="text-muted">100 pts</span>
-              </div>
-            </div>
-          </div>
-          <div className="text-nowrap">
-            <FaCheckCircle className="text-success me-3" />
-            <IoEllipsisVertical className="fs-4" />
-          </div>
-        </ListGroupItem>
+              <div>
+                {/* Assignment Title */}
+                <Link
+                  href={`/Courses/${cid}/Assignments/${a._id}`}
+                  className="fw-bold text-dark text-decoration-none"
+                >
+                  {a.title}
+                </Link>
 
-        {/* A3 */}
-        <ListGroupItem className="assignment-item p-3 d-flex justify-content-between align-items-center">
-          <div className="d-flex align-items-center">
-            <BsGripVertical className="me-2 fs-5" />
-            <MdAssignment className="text-success me-2 fs-4" />
-            <div>
-              <Link
-                href="/Courses/1234/Assignments/3"
-                className="fw-bold text-dark text-decoration-none"
-              >
-                A3
-              </Link>
-              <div className="small">
-                <span className="text-danger fw-bold">Multiple Modules</span> |{" "}
-                <span className="fw-bold text-muted">Not available until</span>{" "}
-                <span className="text-muted">May 20 at 12:00am</span> |{" "}
-                <span className="fw-bold text-muted">Due</span>{" "}
-                <span className="text-muted"> May 27 at 11:59pm</span> |{" "}
-                <span className="text-muted">100 pts</span>
+                {/* Assignment Meta Info */}
+                <div className="small">
+                  <span className="text-danger fw-bold">Multiple Modules</span>{" "}
+                  |{" "}
+                  <span className="fw-bold text-muted">Not available until</span>{" "}
+                  <span className="text-muted">
+                    {new Date(a.availableFrom).toLocaleString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
+                  </span>{" "}
+                  | <span className="fw-bold text-muted">Due</span>{" "}
+                  <span className="text-muted">
+                    {new Date(a.dueDate).toLocaleString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
+                  </span>{" "}
+                  | <span className="text-muted">{a.points} pts</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="text-nowrap">
-            <FaCheckCircle className="text-success me-3" />
-            <IoEllipsisVertical className="fs-4" />
-          </div>
-        </ListGroupItem>
+
+            {/* Icons on the right */}
+            <div className="text-nowrap">
+              <FaCheckCircle className="text-success me-3" />
+              <IoEllipsisVertical className="fs-4" />
+            </div>
+          </ListGroupItem>
+        ))}
       </ListGroup>
     </div>
   );
