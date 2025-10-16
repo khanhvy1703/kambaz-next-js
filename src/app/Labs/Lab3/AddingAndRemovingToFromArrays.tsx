@@ -1,5 +1,5 @@
 export default function AddingAndRemovingToFromArrays() {
-  let todos = ["Buy milk", "Feed the pets"];
+  const todos = ["Buy milk", "Feed the pets"];
 
   todos.push("Walk the dogs"); // add item dynamically
 
