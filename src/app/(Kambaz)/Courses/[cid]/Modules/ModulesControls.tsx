@@ -1,18 +1,34 @@
-import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from "react-bootstrap";
+import {
+  Button,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
+} from "react-bootstrap";
 import { FaPlus } from "react-icons/fa6";
 import GreenCheckmark from "./GreenCheckmark";
 
 export default function ModulesControls() {
   return (
     <div id="wd-modules-controls" className="text-nowrap">
-      <Button variant="danger" size="sm" className="me-1 float-end" id="wd-add-module-btn">
+      <Button
+        variant="danger"
+        size="sm"
+        className="me-1 float-end"
+        id="wd-add-module-btn"
+      >
         <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
         Module
       </Button>
 
       <Dropdown className="float-end me-2">
-        <DropdownToggle variant="secondary" size="sm" id="wd-publish-all-btn">
-          <GreenCheckmark /> Publish All
+        <DropdownToggle
+          variant="secondary"
+          size="sm"
+          id="wd-publish-all-btn"
+          className="d-flex align-items-center gap-1"
+        >
+          <GreenCheckmark /> <span>Publish All</span>
         </DropdownToggle>
 
         <DropdownMenu>

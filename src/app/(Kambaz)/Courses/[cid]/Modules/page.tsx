@@ -31,12 +31,7 @@ export default function Modules() {
                 <BsGripVertical className="me-2 fs-5" />
                 <span className="d-flex align-items-center">{module.name}</span>
               </div>
-              <span className="d-flex align-items-center">
-                <GreenCheckmark />
-                <FaPlus color="#6c757d" className="ms-2" />
-                <IoEllipsisVertical className="ms-2 fs-5" />
                 <ModuleControlButtons />
-              </span>
             </ListGroupItem>
 
             {/* Lessons under this module */}
