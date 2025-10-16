@@ -1,6 +1,6 @@
 "use client";
 
-import { Col, ListGroup, ListGroupItem, Row, Table } from "react-bootstrap";
+import { ListGroup, ListGroupItem} from "react-bootstrap";
 import "./index.css";
 
 export default function BootstrapLists() {

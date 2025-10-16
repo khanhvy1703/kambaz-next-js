@@ -1,4 +1,4 @@
-import { Col, Row, Table } from "react-bootstrap";
+import { Table } from "react-bootstrap";
 import "./index.css";
 
 export default function BootstrapGrid() {
