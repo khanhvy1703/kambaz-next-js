@@ -73,7 +73,6 @@ export default function Dashboard() {
 
       <hr />
 
-      {/* Published Courses */}
       <h2 id="wd-dashboard-published">
         Published Courses ({userCourses.length})
       </h2>
