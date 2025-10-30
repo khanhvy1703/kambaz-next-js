@@ -8,7 +8,7 @@ import { Button } from "react-bootstrap";
 
 export default function CourseStatus() {
   return (
-    <div id="wd-course-status" style={{ width: "250px" }}>
+    <div id="wd-course-status" style={{ width: "230px"}}>
       <h2>Course Status</h2>
 
       {/* Unpublish / Publish row */}

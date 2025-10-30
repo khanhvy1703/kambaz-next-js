@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import {
   Button,
   Dropdown,
@@ -7,20 +10,46 @@ import {
 } from "react-bootstrap";
 import { FaPlus } from "react-icons/fa6";
 import GreenCheckmark from "./GreenCheckmark";
+import ModuleEditor from "./ModuleEditor";
 
-export default function ModulesControls() {
+type ModulesControlsProps = {
+  moduleName: string;
+  setModuleName: (name: string) => void;
+  addModule: () => void;
+};
+
+export default function ModulesControls({
+  moduleName,
+  setModuleName,
+  addModule,
+}: ModulesControlsProps) {
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
   return (
     <div id="wd-modules-controls" className="text-nowrap">
+      {/* Collapse All Button */}
       <Button
-        variant="danger"
+        variant="secondary"
         size="sm"
-        className="me-1 float-end"
-        id="wd-add-module-btn"
+        className="float-end me-2"
+        id="wd-collapse-all"
       >
-        <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
-        Module
+        Collapse All
       </Button>
 
+      {/* View Progress Button */}
+      <Button
+        variant="secondary"
+        size="sm"
+        className="float-end me-2"
+        id="wd-view-progress"
+      >
+        View Progress
+      </Button>
+
+      {/* Publish Dropdown */}
       <Dropdown className="float-end me-2">
         <DropdownToggle
           variant="secondary"
@@ -50,23 +79,27 @@ export default function ModulesControls() {
         </DropdownMenu>
       </Dropdown>
 
+      {/* Add Module Button */}
       <Button
-        variant="secondary"
+        variant="danger"
         size="sm"
-        className="float-end me-2"
-        id="wd-view-progress"
+        className="me-1 float-end"
+        id="wd-add-module-btn"
+        onClick={handleShow}
       >
-        View Progress
+        <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
+        Module
       </Button>
 
-      <Button
-        variant="secondary"
-        size="sm"
-        className="float-end me-2"
-        id="wd-collapse-all"
-      >
-        Collapse All
-      </Button>
+      {/* Modal Editor */}
+      <ModuleEditor
+        show={show}
+        handleClose={handleClose}
+        dialogTitle="Add Module"
+        moduleName={moduleName}
+        setModuleName={setModuleName}
+        addModule={addModule}
+      />
     </div>
   );
 }

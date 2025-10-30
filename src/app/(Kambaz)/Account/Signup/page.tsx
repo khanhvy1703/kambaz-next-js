@@ -4,7 +4,7 @@ import { FormControl } from "react-bootstrap";
 
 export default function Signup() {
   return (
-    <div id="wd-signup-screen">
+    <div id="wd-signup-screen" className="p-4" style={{ maxWidth: "400px" }}>
       <h1>Signup</h1>
       <FormControl
         id="wd-username"
