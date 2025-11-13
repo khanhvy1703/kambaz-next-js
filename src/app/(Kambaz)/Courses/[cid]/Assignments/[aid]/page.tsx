@@ -3,9 +3,10 @@
 import { Form, Button, Row, Col } from "react-bootstrap";
 import { useParams, useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
-import { addAssignment, updateAssignment } from "../reducer";
 import { v4 as uuidv4 } from "uuid";
 import { useState, useEffect } from "react";
+import * as client from "../../../client";
+import { addAssignment, updateAssignment } from "../reducer";
 
 export default function AssignmentEditor() {
   const { cid, aid } = useParams();
@@ -15,15 +16,7 @@ export default function AssignmentEditor() {
   const { assignments } = useSelector((state: any) => state.assignmentsReducer);
   const existingAssignment = assignments.find((a: any) => a._id === aid);
 
-  // ✅ Default nested structure
-  const defaultOnlineEntryOptions = {
-    textEntry: false,
-    websiteURL: true,
-    mediaRecordings: false,
-    studentAnnotation: false,
-    fileUploads: false,
-  };
-
+  // ✅ Default structure for new assignments
   const defaultForm = {
     _id: uuidv4(),
     course: cid,
@@ -33,73 +26,89 @@ export default function AssignmentEditor() {
     assignmentGroup: "ASSIGNMENTS",
     displayGradeAs: "Percentage",
     submissionType: "Online",
-    onlineEntryOptions: defaultOnlineEntryOptions,
     assignTo: "Everyone",
     dueDate: new Date().toISOString().slice(0, 16),
     availableFrom: new Date().toISOString().slice(0, 16),
     availableUntil: new Date().toISOString().slice(0, 16),
   };
 
-  // ✅ Merge defaults + existing (fix undefined fields)
+  // ✅ Merge defaults with existing assignment if editing
   const mergedAssignment = existingAssignment
     ? {
         ...defaultForm,
         ...existingAssignment,
-        onlineEntryOptions: {
-          ...defaultOnlineEntryOptions,
-          ...(existingAssignment.onlineEntryOptions || {}),
-        },
-        // normalize date fields for datetime-local
         dueDate: existingAssignment.dueDate
           ? new Date(existingAssignment.dueDate).toISOString().slice(0, 16)
           : defaultForm.dueDate,
         availableFrom: existingAssignment.availableFrom
-          ? new Date(existingAssignment.availableFrom).toISOString().slice(0, 16)
+          ? new Date(existingAssignment.availableFrom)
+              .toISOString()
+              .slice(0, 16)
           : defaultForm.availableFrom,
         availableUntil: existingAssignment.availableUntil
-          ? new Date(existingAssignment.availableUntil).toISOString().slice(0, 16)
+          ? new Date(existingAssignment.availableUntil)
+              .toISOString()
+              .slice(0, 16)
           : defaultForm.availableUntil,
       }
     : defaultForm;
 
   const [form, setForm] = useState<any>(mergedAssignment);
 
+  // ✅ When existing assignment changes, update form
   useEffect(() => {
     if (existingAssignment) {
       setForm(mergedAssignment);
     }
   }, [existingAssignment]);
 
-  const handleSave = () => {
+  // ✅ Fetch assignment from server when editing
+  useEffect(() => {
+    const fetchAssignment = async () => {
+      if (!aid) return;
+      try {
+        const data = await client.findAssignmentsForCourse(cid as string);
+        const assignment = data.find((a: any) => a._id === aid);
+        if (assignment) {
+          // Merge with defaults to avoid undefined fields
+          setForm({ ...defaultForm, ...assignment });
+        }
+      } catch (e) {
+        console.error("Failed to fetch assignment:", e);
+      }
+    };
+    fetchAssignment();
+  }, [aid, cid]);
+
+  // ✅ Handle save
+  const handleSave = async () => {
     const updatedForm = {
       ...form,
-      // ensure proper ISO format when saving
       dueDate: new Date(form.dueDate).toISOString(),
       availableFrom: new Date(form.availableFrom).toISOString(),
       availableUntil: new Date(form.availableUntil).toISOString(),
     };
 
-    if (existingAssignment) {
-      dispatch(updateAssignment(updatedForm));
-    } else {
-      dispatch(addAssignment(updatedForm));
+    try {
+      if (existingAssignment) {
+        const updated = await client.updateAssignment(aid as string, updatedForm);
+        dispatch(updateAssignment(updated));
+      } else {
+        const newAssignment = await client.createAssignmentForCourse(
+          cid as string,
+          updatedForm
+        );
+        dispatch(addAssignment(newAssignment));
+      }
+      router.push(`/Courses/${cid}/Assignments`);
+    } catch (error) {
+      console.error("Error saving assignment:", error);
+      alert("Failed to save assignment. Check server logs for details.");
     }
-
-    router.push(`/Courses/${cid}/Assignments`);
   };
 
   const handleCancel = () => {
     router.push(`/Courses/${cid}/Assignments`);
-  };
-
-  const handleCheckboxChange = (key: string) => {
-    setForm({
-      ...form,
-      onlineEntryOptions: {
-        ...form.onlineEntryOptions,
-        [key]: !form.onlineEntryOptions[key],
-      },
-    });
   };
 
   return (
@@ -110,7 +119,7 @@ export default function AssignmentEditor() {
           <Form.Label>Assignment Name</Form.Label>
           <Form.Control
             type="text"
-            value={form.title}
+            value={form.title || ""}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
           />
         </Form.Group>
@@ -121,7 +130,7 @@ export default function AssignmentEditor() {
           <Form.Control
             as="textarea"
             rows={6}
-            value={form.description}
+            value={form.description || ""}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
         </Form.Group>
@@ -136,7 +145,7 @@ export default function AssignmentEditor() {
               <Col sm={10}>
                 <Form.Control
                   type="number"
-                  value={form.points}
+                  value={form.points ?? 0}
                   onChange={(e) =>
                     setForm({ ...form, points: Number(e.target.value) })
                   }
@@ -151,7 +160,7 @@ export default function AssignmentEditor() {
               </Form.Label>
               <Col sm={10}>
                 <Form.Select
-                  value={form.assignmentGroup}
+                  value={form.assignmentGroup || "ASSIGNMENTS"}
                   onChange={(e) =>
                     setForm({ ...form, assignmentGroup: e.target.value })
                   }
@@ -171,7 +180,7 @@ export default function AssignmentEditor() {
               </Form.Label>
               <Col sm={10}>
                 <Form.Select
-                  value={form.displayGradeAs}
+                  value={form.displayGradeAs || "Percentage"}
                   onChange={(e) =>
                     setForm({ ...form, displayGradeAs: e.target.value })
                   }
@@ -192,7 +201,7 @@ export default function AssignmentEditor() {
               <Col sm={10}>
                 <div className="mt-2 p-3 border rounded">
                   <Form.Select
-                    value={form.submissionType}
+                    value={form.submissionType || "Online"}
                     onChange={(e) =>
                       setForm({ ...form, submissionType: e.target.value })
                     }
@@ -201,52 +210,6 @@ export default function AssignmentEditor() {
                     <option>On Paper</option>
                     <option>No Submission</option>
                   </Form.Select>
-
-                  <div className="mt-3">
-                    <strong>Online Entry Options</strong>
-                  </div>
-
-                  <div>
-                    <Form.Check
-                      className="mt-3"
-                      type="checkbox"
-                      label="Text Entry"
-                      checked={form.onlineEntryOptions.textEntry}
-                      onChange={() => handleCheckboxChange("textEntry")}
-                    />
-                    <Form.Check
-                      className="mt-3"
-                      type="checkbox"
-                      label="Website URL"
-                      checked={form.onlineEntryOptions.websiteURL}
-                      onChange={() => handleCheckboxChange("websiteURL")}
-                    />
-                    <Form.Check
-                      className="mt-3"
-                      type="checkbox"
-                      label="Media Recordings"
-                      checked={form.onlineEntryOptions.mediaRecordings}
-                      onChange={() =>
-                        handleCheckboxChange("mediaRecordings")
-                      }
-                    />
-                    <Form.Check
-                      className="mt-3"
-                      type="checkbox"
-                      label="Student Annotation"
-                      checked={form.onlineEntryOptions.studentAnnotation}
-                      onChange={() =>
-                        handleCheckboxChange("studentAnnotation")
-                      }
-                    />
-                    <Form.Check
-                      className="mt-3"
-                      type="checkbox"
-                      label="File Uploads"
-                      checked={form.onlineEntryOptions.fileUploads}
-                      onChange={() => handleCheckboxChange("fileUploads")}
-                    />
-                  </div>
                 </div>
               </Col>
             </Form.Group>
@@ -262,7 +225,7 @@ export default function AssignmentEditor() {
                     <Form.Label className="fw-bold">Assign to</Form.Label>
                     <Form.Control
                       type="text"
-                      value={form.assignTo}
+                      value={form.assignTo || ""}
                       onChange={(e) =>
                         setForm({ ...form, assignTo: e.target.value })
                       }
@@ -273,7 +236,7 @@ export default function AssignmentEditor() {
                     <Form.Label className="fw-bold">Due</Form.Label>
                     <Form.Control
                       type="datetime-local"
-                      value={form.dueDate}
+                      value={form.dueDate || ""}
                       onChange={(e) =>
                         setForm({ ...form, dueDate: e.target.value })
                       }
@@ -288,7 +251,7 @@ export default function AssignmentEditor() {
                         </Form.Label>
                         <Form.Control
                           type="datetime-local"
-                          value={form.availableFrom}
+                          value={form.availableFrom || ""}
                           onChange={(e) =>
                             setForm({
                               ...form,
@@ -304,7 +267,7 @@ export default function AssignmentEditor() {
                         <Form.Label className="fw-bold">Until</Form.Label>
                         <Form.Control
                           type="datetime-local"
-                          value={form.availableUntil}
+                          value={form.availableUntil || ""}
                           onChange={(e) =>
                             setForm({
                               ...form,

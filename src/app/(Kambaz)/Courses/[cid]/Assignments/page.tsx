@@ -16,8 +16,10 @@ import { MdAssignment } from "react-icons/md";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
-import { useState } from "react";
-import { deleteAssignment } from "./reducer";
+import { useState, useEffect } from "react";
+
+import * as client from "../../client";
+import { setAssignments, deleteAssignment } from "./reducer";
 
 export default function Assignments() {
   const { cid } = useParams();
@@ -26,6 +28,19 @@ export default function Assignments() {
 
   const { assignments } = useSelector((state: any) => state.assignmentsReducer);
   const { currentUser } = useSelector((state: any) => state.accountReducer);
+
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      if (!cid) return;
+      try {
+        const data = await client.findAssignmentsForCourse(cid as string);
+        dispatch(setAssignments(data));
+      } catch (error) {
+        console.error("Failed to fetch assignments:", error);
+      }
+    };
+    fetchAssignments();
+  }, [cid, dispatch]);
 
   const courseAssignments = assignments.filter((a: any) => a.course === cid);
   const [showModal, setShowModal] = useState(false);
@@ -38,8 +53,16 @@ export default function Assignments() {
     setShowModal(true);
   };
 
-  const confirmDelete = () => {
-    if (selectedAssignment) dispatch(deleteAssignment(selectedAssignment._id));
+  // ✅ Delete assignment from backend + state
+  const confirmDelete = async () => {
+    if (selectedAssignment) {
+      try {
+        await client.deleteAssignment(selectedAssignment._id);
+        dispatch(deleteAssignment(selectedAssignment._id));
+      } catch (error) {
+        console.error("Failed to delete assignment:", error);
+      }
+    }
     setShowModal(false);
   };
 
@@ -54,7 +77,6 @@ export default function Assignments() {
           <Form.Control placeholder="Search..." />
         </InputGroup>
 
-        {/* Only faculty can create */}
         {isFaculty && (
           <div>
             <Button className="btn-group-custom me-2">
@@ -136,7 +158,6 @@ export default function Assignments() {
 
               <div className="text-nowrap d-flex align-items-center">
                 <FaCheckCircle className="text-success me-3" />
-                {/* Only faculty/TA can delete */}
                 {isFaculty && (
                   <FaTrash
                     className="text-danger me-3"

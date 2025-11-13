@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Row,
@@ -18,12 +18,14 @@ import {
   addNewCourse,
   deleteCourse,
   updateCourse,
+  setCourses,
 } from "../Courses/reducer";
 import {
   toggleShowAllCourses,
   enrollUser,
   unenrollUser,
 } from "../Enrollment/reducer";
+import * as client from "../Courses/client";
 
 export default function Dashboard() {
   const { courses } = useSelector((state: any) => state.coursesReducer);
@@ -44,19 +46,53 @@ export default function Dashboard() {
     description: "New Description",
   });
 
+  const fetchCourses = async () => {
+    try {
+      const courses = await client.findMyCourses();
+      dispatch(setCourses(courses));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const onAddNewCourse = async () => {
+    const newCourse = await client.createCourse(course);
+    dispatch(setCourses([...courses, newCourse]));
+  };
+
+  const onDeleteCourse = async (courseId: string) => {
+    const status = await client.deleteCourse(courseId);
+    dispatch(
+      setCourses(courses.filter((course: any) => course._id !== courseId))
+    );
+  };
+
+  const onUpdateCourse = async () => {
+    await client.updateCourse(course);
+    dispatch(
+      setCourses(
+        courses.map((c:any) => {
+          if (c._id === course._id) {
+            return course;
+          } else {
+            return c;
+          }
+        })
+      )
+    );
+  };
+
+  useEffect(() => {
+    fetchCourses();
+  }, [currentUser]);
+
   const userId = currentUser?._id;
   const userRole = currentUser?.role;
   const isFaculty = ["FACULTY", "ADMIN"].includes(userRole);
 
-  // 🧮 Courses user is enrolled in
   const userCourseIds = enrollments
     .filter((e: any) => e.user === userId)
     .map((e: any) => e.course);
-
-  // 🎛️ Courses visible depending on toggle
-  const visibleCourses = showAllCourses
-    ? courses
-    : courses.filter((c: any) => userCourseIds.includes(c._id));
 
   const handleEnroll = (courseId: string) =>
     dispatch(enrollUser({ userId, courseId }));
@@ -69,7 +105,6 @@ export default function Dashboard() {
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h1 id="wd-dashboard-title">Dashboard</h1>
 
-        {/* 🔵 Enrollments Toggle Button */}
         {!isFaculty && (
           <Button
             variant="primary"
@@ -90,7 +125,7 @@ export default function Dashboard() {
             <button
               className="btn btn-primary float-end"
               id="wd-add-new-course-click"
-              onClick={() => dispatch(addNewCourse(course))}
+              onClick={onAddNewCourse}
             >
               Add
             </button>
@@ -125,14 +160,21 @@ export default function Dashboard() {
       )}
 
       <h2 id="wd-dashboard-published">
-        {showAllCourses ? "All Courses" : "My Courses"} ({visibleCourses.length})
+        {showAllCourses ? "All Courses" : "My Courses"} (
+          {showAllCourses
+            ? courses.length
+            : courses.filter((c: any) => userCourseIds.includes(c._id)).length}
+        )
       </h2>
       <hr />
 
       {/* 🧾 Courses Grid */}
       <div id="wd-dashboard-courses">
         <Row xs={1} md={5} className="g-4">
-          {visibleCourses.map((c: any) => {
+          {(showAllCourses
+              ? courses
+              : courses.filter((c: any) => userCourseIds.includes(c._id))
+            ).map((c: any) => {
             const enrolled = userCourseIds.includes(c._id);
             return (
               <Col key={c._id} style={{ width: "300px" }}>
@@ -197,7 +239,7 @@ export default function Dashboard() {
                               variant="danger"
                               onClick={(event) => {
                                 event.preventDefault();
-                                dispatch(deleteCourse(c._id));
+                                onDeleteCourse(c._id);
                               }}
                             >
                               Delete
