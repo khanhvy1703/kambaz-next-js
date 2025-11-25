@@ -56,3 +56,54 @@ body * {
   color: #6c757d;        
   background-color: #fff;
 }
+
+.wd-user-name {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #d9534f;
+  cursor: pointer;
+}
+
+.wd-details-header {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.wd-details-section {
+  margin-top: 15px;
+  margin-bottom: 20px;
+}
+
+.wd-detail-row {
+  display: flex;
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.wd-label {
+  width: 120px;
+  font-weight: 600;
+  color: #444;
+}
+
+.wd-value {
+  flex: 1;
+  color: #222;
+}
+
+.wd-edit-icon,
+.wd-save-icon {
+  font-size: 1.3rem;
+  margin-left: 8px;
+  cursor: pointer;
+  color: #d9534f;
+}
+
+.wd-edit-icon:hover,
+.wd-save-icon:hover {
+  color: #b52b27;
+}
+
+.wd-edit-name-input {
+  width: 250px;
+}
