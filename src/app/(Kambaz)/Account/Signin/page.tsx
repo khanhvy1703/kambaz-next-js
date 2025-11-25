@@ -51,7 +51,7 @@ export default function Signin() {
       </Button>
 
       <div className="mt-2 text-center">
-        <Link id="wd-signup-link" href="/Kambaz/Account/Signup">
+        <Link id="wd-signup-link" href="/Account/Signup">
           Sign up
         </Link>
       </div>
