@@ -13,7 +13,7 @@ export default function KambazLayout({
   return (
     <Provider store={store}>
       <Session>
-      <div className="d-flex" id="wd-kambaz">
+        <div className="d-flex" id="wd-kambaz">
         <div>
           <KambazNavigation />
         </div>

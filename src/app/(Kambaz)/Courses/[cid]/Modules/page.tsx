@@ -4,17 +4,20 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { ListGroup, ListGroupItem, FormControl } from "react-bootstrap";
 import { BsGripVertical } from "react-icons/bs";
+
 import ModulesControls from "./ModulesControls";
 import LessonControlButtons from "./LessonControlButtons";
 import ModuleControlButtons from "./ModuleControlButtons";
+
 import { useSelector, useDispatch } from "react-redux";
 import {
-  setModules,
   addModule,
+  deleteModule as deleteModuleLocal,
   editModule,
-  updateModule,
-  deleteModule,
+  updateModule as updateModuleLocal,
+  setModules,
 } from "./reducer";
+
 import * as client from "../../client";
 
 export default function Modules() {
@@ -22,32 +25,37 @@ export default function Modules() {
   const dispatch = useDispatch();
   const { modules } = useSelector((state: any) => state.modulesReducer);
   const [moduleName, setModuleName] = useState("");
+
   const fetchModules = async () => {
-    const modules = await client.findModulesForCourse(cid as string);
-    dispatch(setModules(modules));
+    const data = await client.findModulesForCourse(cid as string);
+    dispatch(setModules(data));
   };
+
+  useEffect(() => {
+    fetchModules();
+  }, []);
 
   const onCreateModuleForCourse = async () => {
     if (!cid) return;
-    const newModule = { name: moduleName, course: cid };
-    const module = await client.createModuleForCourse(cid as string, newModule);
-    dispatch(setModules([...modules, module]));
+    const newModule = await client.createModuleForCourse(cid as string, {
+      name: moduleName,
+    });
+    dispatch(setModules([...modules, newModule]));
+    setModuleName("");
+  };
+
+  const onUpdateModule = async (module: any) => {
+    const saved = await client.updateModule(module);
+    const newList = modules.map((m: any) =>
+      m._id === module._id ? saved : m
+    );
+    dispatch(setModules(newList));
   };
 
   const onRemoveModule = async (moduleId: string) => {
     await client.deleteModule(moduleId);
     dispatch(setModules(modules.filter((m: any) => m._id !== moduleId)));
   };
-
-  const onUpdateModule = async (module: any) => {
-    await client.updateModule(module);
-    const newModules = modules.map((m: any) => m._id === module._id ? module : m );
-    dispatch(setModules(newModules));
-  };
-
-  useEffect(() => {
-    fetchModules();
-  }, []);
 
   return (
     <div id="wd-modules-screen" className="p-3">
@@ -66,13 +74,19 @@ export default function Modules() {
             <ListGroupItem className="p-3 fs-6 bg-light d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center w-100">
                 <BsGripVertical className="me-2 fs-5" />
+
+                {/* DISPLAY MODE */}
                 {!module.editing && <span>{module.name}</span>}
+
+                {/* EDIT MODE */}
                 {module.editing && (
                   <FormControl
                     className="w-50 d-inline-block"
+                    value={module.name}
+                    autoFocus
                     onChange={(e) =>
                       dispatch(
-                        updateModule({ ...module, name: e.target.value })
+                        updateModuleLocal({ ...module, name: e.target.value })
                       )
                     }
                     onKeyDown={(e) => {
@@ -80,16 +94,14 @@ export default function Modules() {
                         onUpdateModule({ ...module, editing: false });
                       }
                     }}
-                    defaultValue={module.name}
-                    autoFocus
                   />
                 )}
               </div>
 
               <ModuleControlButtons
                 moduleId={module._id}
-                deleteModule={(moduleId) => onRemoveModule(moduleId)}
-                editModule={(moduleId) => dispatch(editModule(moduleId))}
+                deleteModule={() => onRemoveModule(module._id)}
+                editModule={() => dispatch(editModule(module._id))}
               />
             </ListGroupItem>
 

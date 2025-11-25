@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Row,
@@ -22,10 +22,10 @@ import {
 } from "../Courses/reducer";
 import {
   toggleShowAllCourses,
-  enrollUser,
-  unenrollUser,
 } from "../Enrollment/reducer";
-import * as client from "../Courses/client";
+import * as coursesClient from "../Courses/client";
+import * as enrollClient from "../Enrollment/client";
+import { setEnrollments } from "../Enrollment/reducer";
 
 export default function Dashboard() {
   const { courses } = useSelector((state: any) => state.coursesReducer);
@@ -46,46 +46,6 @@ export default function Dashboard() {
     description: "New Description",
   });
 
-  const fetchCourses = async () => {
-    try {
-      const courses = await client.findMyCourses();
-      dispatch(setCourses(courses));
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const onAddNewCourse = async () => {
-    const newCourse = await client.createCourse(course);
-    dispatch(setCourses([...courses, newCourse]));
-  };
-
-  const onDeleteCourse = async (courseId: string) => {
-    const status = await client.deleteCourse(courseId);
-    dispatch(
-      setCourses(courses.filter((course: any) => course._id !== courseId))
-    );
-  };
-
-  const onUpdateCourse = async () => {
-    await client.updateCourse(course);
-    dispatch(
-      setCourses(
-        courses.map((c:any) => {
-          if (c._id === course._id) {
-            return course;
-          } else {
-            return c;
-          }
-        })
-      )
-    );
-  };
-
-  useEffect(() => {
-    fetchCourses();
-  }, [currentUser]);
-
   const userId = currentUser?._id;
   const userRole = currentUser?.role;
   const isFaculty = ["FACULTY", "ADMIN"].includes(userRole);
@@ -94,17 +54,84 @@ export default function Dashboard() {
     .filter((e: any) => e.user === userId)
     .map((e: any) => e.course);
 
-  const handleEnroll = (courseId: string) =>
-    dispatch(enrollUser({ userId, courseId }));
+  const fetchCourses = async () => {
+    try {
+      if (!currentUser) {
+        dispatch(setCourses([]));
+        return;
+      }
 
-  const handleUnenroll = (courseId: string) =>
-    dispatch(unenrollUser({ userId, courseId }));
+      let data;
+
+      if (isFaculty || showAllCourses) {
+        // Faculty always see all courses
+        // Students: "Show All Courses" = all courses
+        data = await coursesClient.fetchAllCourses();
+      } else {
+        // Students: "Show My Courses" = only enrolled courses from server
+        data = await coursesClient.findMyCourses();
+      }
+
+      dispatch(setCourses(data));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCourses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser?._id, showAllCourses, isFaculty]);
+
+  useEffect(() => {
+    const loadEnrollments = async () => {
+      if (currentUser) {
+        const data = await enrollClient.findMyEnrollments();
+        dispatch(setEnrollments(data));
+      }
+    };
+    loadEnrollments();
+  }, [currentUser]);
+
+  const visibleCourses = courses;
+
+  const handleEnroll = async (courseId: string) => {
+    await enrollClient.enroll(courseId);
+    const data = await enrollClient.findMyEnrollments();
+    dispatch(setEnrollments(data));
+    await fetchCourses(); 
+  };
+
+  const handleUnenroll = async (courseId: string) => {
+    await enrollClient.unenroll(courseId);
+    const data = await enrollClient.findMyEnrollments();
+    dispatch(setEnrollments(data));
+    await fetchCourses(); 
+  };
+
+  const onAddNewCourse = async () => {
+    const newCourse = await coursesClient.createCourse(course);
+    dispatch(setCourses([...courses, newCourse]));
+  };
+
+  const onDeleteCourse = async (courseId: string) => {
+    await coursesClient.deleteCourse(courseId);
+    dispatch(setCourses(courses.filter((c: any) => c._id !== courseId)));
+  };
+
+  const onUpdateCourse = async () => {
+    await coursesClient.updateCourse(course);
+    dispatch(
+      setCourses(courses.map((c: any) => (c._id === course._id ? course : c)))
+    );
+  };
 
   return (
     <div className="p-4" id="wd-dashboard">
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h1 id="wd-dashboard-title">Dashboard</h1>
 
+        {/* 🔵 Enrollments Toggle Button (students only) */}
         {!isFaculty && (
           <Button
             variant="primary"
@@ -123,16 +150,16 @@ export default function Dashboard() {
           <h5>
             New Course
             <button
+              onClick={onAddNewCourse}
               className="btn btn-primary float-end"
               id="wd-add-new-course-click"
-              onClick={onAddNewCourse}
             >
               Add
             </button>
             <button
+              onClick={onUpdateCourse}
               className="btn btn-warning float-end me-2"
               id="wd-update-course-click"
-              onClick={() => dispatch(updateCourse(course))}
             >
               Update
             </button>
@@ -160,22 +187,27 @@ export default function Dashboard() {
       )}
 
       <h2 id="wd-dashboard-published">
-        {showAllCourses ? "All Courses" : "My Courses"} (
-          {showAllCourses
-            ? courses.length
-            : courses.filter((c: any) => userCourseIds.includes(c._id)).length}
-        )
+        {isFaculty
+          ? "All Courses"
+          : showAllCourses
+          ? "All Courses"
+          : "My Courses"}{" "}
+        ({visibleCourses.length})
       </h2>
       <hr />
 
       {/* 🧾 Courses Grid */}
       <div id="wd-dashboard-courses">
         <Row xs={1} md={5} className="g-4">
-          {(showAllCourses
-              ? courses
-              : courses.filter((c: any) => userCourseIds.includes(c._id))
-            ).map((c: any) => {
-            const enrolled = userCourseIds.includes(c._id);
+          {visibleCourses.map((c: any) => {
+            // In "My Courses" mode, everything visible is enrolled.
+            // In "All Courses" mode, rely on client-side enrollments.
+            const enrolled = isFaculty
+              ? false
+              : showAllCourses
+              ? userCourseIds.includes(c._id)
+              : true;
+
             return (
               <Col key={c._id} style={{ width: "300px" }}>
                 <Card>

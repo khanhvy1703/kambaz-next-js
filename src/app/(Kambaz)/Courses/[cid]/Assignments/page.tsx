@@ -16,10 +16,9 @@ import { MdAssignment } from "react-icons/md";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
-import { useState, useEffect } from "react";
-
-import * as client from "../../client";
-import { setAssignments, deleteAssignment } from "./reducer";
+import { useEffect, useState } from "react";
+import { deleteAssignment, setAssignments } from "./reducer";
+import * as client from "../Assignments/client";
 
 export default function Assignments() {
   const { cid } = useParams();
@@ -28,19 +27,6 @@ export default function Assignments() {
 
   const { assignments } = useSelector((state: any) => state.assignmentsReducer);
   const { currentUser } = useSelector((state: any) => state.accountReducer);
-
-  useEffect(() => {
-    const fetchAssignments = async () => {
-      if (!cid) return;
-      try {
-        const data = await client.findAssignmentsForCourse(cid as string);
-        dispatch(setAssignments(data));
-      } catch (error) {
-        console.error("Failed to fetch assignments:", error);
-      }
-    };
-    fetchAssignments();
-  }, [cid, dispatch]);
 
   const courseAssignments = assignments.filter((a: any) => a.course === cid);
   const [showModal, setShowModal] = useState(false);
@@ -53,18 +39,25 @@ export default function Assignments() {
     setShowModal(true);
   };
 
-  // ✅ Delete assignment from backend + state
   const confirmDelete = async () => {
     if (selectedAssignment) {
-      try {
-        await client.deleteAssignment(selectedAssignment._id);
-        dispatch(deleteAssignment(selectedAssignment._id));
-      } catch (error) {
-        console.error("Failed to delete assignment:", error);
-      }
+      await client.deleteAssignment(selectedAssignment._id);
+      dispatch(
+        setAssignments(
+          assignments.filter((a: any) => a._id !== selectedAssignment._id)
+        )
+      );
     }
     setShowModal(false);
   };
+
+  useEffect(() => {
+    const loadAssignments = async () => {
+      const data = await client.findAssignmentsForCourse(cid as string);
+      dispatch(setAssignments(data));
+    };
+    loadAssignments();
+  }, [cid]);
 
   return (
     <div id="wd-assignments-screen" className="p-3">
@@ -77,6 +70,7 @@ export default function Assignments() {
           <Form.Control placeholder="Search..." />
         </InputGroup>
 
+        {/* Only faculty can create */}
         {isFaculty && (
           <div>
             <Button className="btn-group-custom me-2">
@@ -126,8 +120,13 @@ export default function Assignments() {
                   </Link>
 
                   <div className="small">
-                    <span className="text-danger fw-bold">Multiple Modules</span> |{" "}
-                    <span className="fw-bold text-muted">Not available until</span>{" "}
+                    <span className="text-danger fw-bold">
+                      Multiple Modules
+                    </span>{" "}
+                    |{" "}
+                    <span className="fw-bold text-muted">
+                      Not available until
+                    </span>{" "}
                     <span className="text-muted">
                       {a.availableFrom
                         ? new Date(a.availableFrom).toLocaleString("en-US", {
@@ -158,6 +157,7 @@ export default function Assignments() {
 
               <div className="text-nowrap d-flex align-items-center">
                 <FaCheckCircle className="text-success me-3" />
+                {/* Only faculty/TA can delete */}
                 {isFaculty && (
                   <FaTrash
                     className="text-danger me-3"
