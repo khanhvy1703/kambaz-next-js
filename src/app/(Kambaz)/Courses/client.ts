@@ -2,7 +2,7 @@ import axios from "axios";
 
 const axiosWithCredentials = axios.create({ withCredentials: true });
 
-const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
+const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER_A6;
 const COURSES_API = `${HTTP_SERVER}/api/courses`;
 const USERS_API = `${HTTP_SERVER}/api/users`;
 
@@ -37,7 +37,7 @@ export const updateCourse = async (course: any) => {
 };
 
 export const findModulesForCourse = async (courseId: string) => {
-  const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
+  const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER_A6;
   const COURSES_API = `${HTTP_SERVER}/api/courses`;
 
   const response = await axios.get(`${COURSES_API}/${courseId}/modules`);
