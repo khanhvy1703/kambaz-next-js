@@ -20,11 +20,8 @@ import {
   updateCourse,
   setCourses,
 } from "../Courses/reducer";
-import {
-  toggleShowAllCourses,
-} from "../Enrollment/reducer";
+import { toggleShowAllCourses } from "../Enrollment/reducer";
 import * as coursesClient from "../Courses/client";
-import * as enrollClient from "../Enrollment/client";
 import { setEnrollments } from "../Enrollment/reducer";
 
 export default function Dashboard() {
@@ -51,7 +48,7 @@ export default function Dashboard() {
   const isFaculty = ["FACULTY", "ADMIN"].includes(userRole);
 
   const userCourseIds = enrollments
-    .filter((e: any) => e.user === userId)
+    .filter((e: any) => e && e.course)
     .map((e: any) => e.course);
 
   const fetchCourses = async () => {
@@ -86,8 +83,14 @@ export default function Dashboard() {
   useEffect(() => {
     const loadEnrollments = async () => {
       if (currentUser) {
-        const data = await enrollClient.findMyEnrollments();
-        dispatch(setEnrollments(data));
+        const courses = await coursesClient.findMyCourses();
+        const normalized = courses
+          .filter((c: any) => c && c._id) // ⬅ FIX: prevent null crashes
+          .map((c: any) => ({
+            user: currentUser._id,
+            course: c._id,
+          }));
+        dispatch(setEnrollments(normalized));
       }
     };
     loadEnrollments();
@@ -96,17 +99,25 @@ export default function Dashboard() {
   const visibleCourses = courses;
 
   const handleEnroll = async (courseId: string) => {
-    await enrollClient.enroll(courseId);
-    const data = await enrollClient.findMyEnrollments();
-    dispatch(setEnrollments(data));
-    await fetchCourses(); 
+    await coursesClient.enrollIntoCourse(currentUser._id, courseId);
+    const courses = await coursesClient.findMyCourses();
+    const mapped = courses.map((c: any) => ({
+      user: currentUser._id,
+      course: c._id,
+    }));
+    dispatch(setEnrollments(mapped));
+    await fetchCourses();
   };
 
   const handleUnenroll = async (courseId: string) => {
-    await enrollClient.unenroll(courseId);
-    const data = await enrollClient.findMyEnrollments();
-    dispatch(setEnrollments(data));
-    await fetchCourses(); 
+    await coursesClient.unenrollFromCourse(currentUser._id, courseId);
+    const courses = await coursesClient.findMyCourses();
+    const mapped = courses.map((c: any) => ({
+      user: currentUser._id,
+      course: c._id,
+    }));
+    dispatch(setEnrollments(mapped));
+    await fetchCourses();
   };
 
   const onAddNewCourse = async () => {

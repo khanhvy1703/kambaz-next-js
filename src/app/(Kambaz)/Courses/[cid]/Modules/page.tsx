@@ -21,7 +21,7 @@ import {
 import * as client from "../../client";
 
 export default function Modules() {
-  const { cid } = useParams();
+  const { cid } = useParams() as { cid: string };
   const dispatch = useDispatch();
   const { modules } = useSelector((state: any) => state.modulesReducer);
   const [moduleName, setModuleName] = useState("");
@@ -45,7 +45,7 @@ export default function Modules() {
   };
 
   const onUpdateModule = async (module: any) => {
-    const saved = await client.updateModule(module);
+    const saved = await client.updateModule(cid, module);
     const newList = modules.map((m: any) =>
       m._id === module._id ? saved : m
     );
@@ -53,7 +53,7 @@ export default function Modules() {
   };
 
   const onRemoveModule = async (moduleId: string) => {
-    await client.deleteModule(moduleId);
+    await client.deleteModule(cid, moduleId);
     dispatch(setModules(modules.filter((m: any) => m._id !== moduleId)));
   };
 
