@@ -1,55 +1,27 @@
 "use client";
 
-import { useState } from "react";
-import { FaUserCircle } from "react-icons/fa";
-import PeopleDetails from "../Details";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import PeopleTable from "./PeopleTable";
+import * as coursesClient from "../../../client";
 
-export default function PeopleTable({
-  users = [],
-  fetchUsers,
-}: {
-  users?: any[];
-  fetchUsers: () => void;
-}) {
-  const [showDetails, setShowDetails] = useState(false);
-  const [showUserId, setShowUserId] = useState<string | null>(null);
+export default function PeopleTablePage() {
+  const { cid } = useParams();
+  const [users, setUsers] = useState<any[]>([]);
+
+  const fetchUsers = async () => {
+    if (!cid) return;
+    const data = await coursesClient.findUsersForCourse(cid as string);
+    setUsers(data);
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, [cid]);
 
   return (
-    <div id="wd-people-table">
-      {showDetails && (
-        <PeopleDetails
-          uid={showUserId}
-          onClose={() => {
-            setShowDetails(false);
-            fetchUsers();
-          }}
-        />
-      )}
-
-      <table className="table table-striped">
-        <tbody>
-          {users.map((user: any) => (
-            <tr key={user._id}>
-              <td className="wd-full-name text-nowrap">
-                <span
-                  className="text-decoration-none"
-                  onClick={() => {
-                    setShowDetails(true);
-                    setShowUserId(user._id);
-                  }}
-                  style={{ cursor: "pointer" }}
-                >
-                  <FaUserCircle className="me-2 fs-1 text-secondary" />
-                  <span className="wd-first-name">{user.firstName}</span>{" "}
-                  <span className="wd-last-name">{user.lastName}</span>
-                </span>
-              </td>
-
-              {/* other columns... */}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="p-4">
+      <PeopleTable users={users} fetchUsers={fetchUsers} />
     </div>
   );
 }
