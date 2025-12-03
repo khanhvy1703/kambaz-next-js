@@ -15,9 +15,6 @@ import {
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  addNewCourse,
-  deleteCourse,
-  updateCourse,
   setCourses,
 } from "../Courses/reducer";
 import { toggleShowAllCourses } from "../Enrollment/reducer";
@@ -27,6 +24,7 @@ import { setEnrollments } from "../Enrollment/reducer";
 export default function Dashboard() {
   const { courses } = useSelector((state: any) => state.coursesReducer);
   const { currentUser } = useSelector((state: any) => state.accountReducer);
+  console.log("Current User in Dashboard:", currentUser);
   const { enrollments, showAllCourses } = useSelector(
     (state: any) => state.enrollmentsReducer
   );

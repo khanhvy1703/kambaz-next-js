@@ -4,15 +4,29 @@ import { ReactNode, useState } from "react";
 import { FaAlignJustify } from "react-icons/fa6";
 import { useSelector } from "react-redux";
 import { useParams } from "next/navigation";
+
+import Session from "../../Account/Session";   // <-- ✅ ADD THIS
 import CourseNavigation from "./Navigation";
 import Breadcrumb from "./Breadcrumb";
 
 export default function CoursesLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
+
+  return (
+    <Session>
+      <InnerCoursesLayout>
+        {children}
+      </InnerCoursesLayout>
+    </Session>
+  );
+}
+
+function InnerCoursesLayout({ children }: any) {
   const { cid } = useParams();
   const { courses } = useSelector((state: any) => state.coursesReducer);
   const course = courses.find((c: any) => c._id === cid);
+
   const [showNav, setShowNav] = useState(true);
   const toggleNav = () => setShowNav(!showNav);
 
@@ -27,7 +41,9 @@ export default function CoursesLayout({
         />
         <Breadcrumb course={course} />
       </h2>
+
       <hr />
+
       <div className="d-flex">
         {showNav && (
           <div
@@ -38,6 +54,7 @@ export default function CoursesLayout({
             <CourseNavigation />
           </div>
         )}
+
         <div className="flex-fill">{children}</div>
       </div>
     </div>

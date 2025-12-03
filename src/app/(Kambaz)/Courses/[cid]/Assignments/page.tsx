@@ -27,6 +27,7 @@ export default function Assignments() {
 
   const { assignments } = useSelector((state: any) => state.assignmentsReducer);
   const { currentUser } = useSelector((state: any) => state.accountReducer);
+  console.log("Current User in Assignment:", currentUser);
 
   const courseAssignments = assignments.filter((a: any) => a.course === cid);
   const [showModal, setShowModal] = useState(false);
