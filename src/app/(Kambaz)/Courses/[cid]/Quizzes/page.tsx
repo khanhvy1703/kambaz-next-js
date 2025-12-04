@@ -22,6 +22,7 @@ import {
 import { BsGripVertical, BsThreeDotsVertical } from "react-icons/bs";
 import { AiOutlineCalendar, AiOutlineClockCircle } from "react-icons/ai";
 import { FaSearch } from "react-icons/fa";
+import axios from "axios";
 
 export default function QuizzesPage() {
   const { cid } = useParams();
@@ -51,8 +52,33 @@ export default function QuizzesPage() {
       return aTime - bTime;
     });
 
-    setQuizzes(visible);
-    setFilteredQuizzes(visible);
+    const loadAttemptsForQuiz = async (quizId: string) => {
+      const { data } = await axios.get(
+        `${process.env.NEXT_PUBLIC_HTTP_SERVER}/api/quizzes/${quizId}/attempts`,
+        { withCredentials: true }
+      );
+      return data;
+    };
+
+    if (isStudent) {
+      const quizzesWithAttempts = await Promise.all(
+        visible.map(async (q: any) => {
+          const attempts = await loadAttemptsForQuiz(q._id);
+          const bestScore =
+            attempts.length > 0
+              ? Math.max(...attempts.map((a: any) => a.score))
+              : null;
+
+          return { ...q, attempts, bestScore };
+        })
+      );
+
+      setQuizzes(quizzesWithAttempts);
+      setFilteredQuizzes(quizzesWithAttempts);
+    } else {
+      setQuizzes(visible);
+      setFilteredQuizzes(visible);
+    }
   };
 
   useEffect(() => {
@@ -94,14 +120,17 @@ export default function QuizzesPage() {
       : null;
 
     if (availableAt && now < availableAt) {
-      return `Not available until ${availableAt.toLocaleString()}`;
+      return {
+        text: `Not available until ${availableAt.toLocaleString()}`,
+        status: "notyet",
+      };
     }
 
     if (availableUntil && now > availableUntil) {
-      return "Closed";
+      return { text: "Closed", status: "closed" };
     }
 
-    return "Available";
+    return { text: "Available", status: "available" };
   };
 
   return (
@@ -161,10 +190,25 @@ export default function QuizzesPage() {
                 </div>
 
                 {/* Availability */}
-                <div className="small text-muted mt-1 d-flex gap-2">
-                  <AiOutlineClockCircle size={14} className="mt-1" />
-                  {availabilityStatus(quiz)}
-                </div>
+                {(() => {
+                  const status = availabilityStatus(quiz);
+
+                  return (
+                    <div className="small mt-1 d-flex gap-2">
+                      <AiOutlineClockCircle size={14} className="mt-1" />
+
+                      <span
+                        className={
+                          status.status === "available"
+                            ? "fw-bold text-danger" // red & bold
+                            : "fw-bold" // bold only
+                        }
+                      >
+                        {status.text}
+                      </span>
+                    </div>
+                  );
+                })()}
 
                 {/* Due Date */}
                 {quiz.dueDate && (
@@ -175,9 +219,23 @@ export default function QuizzesPage() {
                 )}
 
                 {/* Meta Info */}
-                <div className="small mt-1 text-muted">
-                  {quiz.points ?? 0} pts • {quiz.questions?.length ?? 0}{" "}
-                  Questions
+                <div className="small mt-1 text-muted d-flex flex-wrap gap-2">
+                  {/* Question Count */}
+                  <span>{quiz.questions?.length ?? 0} Questions</span>
+
+                  {/* Divider */}
+                  <span>|</span>
+
+                  {/* SCORE (Student) or TOTAL PTS (Faculty) */}
+                  {isStudent ? (
+                    <span>
+                      {quiz.bestScore !== null
+                        ? `${quiz.bestScore} / ${quiz.points} pts`
+                        : `-- / ${quiz.points} pts`}
+                    </span>
+                  ) : (
+                    <span>{quiz.points} pts</span>
+                  )}
                 </div>
               </div>
             </div>
