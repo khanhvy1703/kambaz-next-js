@@ -5,9 +5,10 @@ import { useParams, useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { Button } from "react-bootstrap";
+import { togglePublishQuiz } from "../client";
 
 export default function QuizDetailsPage() {
-  const { cid, qid } = useParams();
+  const { cid, qid } = useParams() as { cid: string; qid: string };
   const router = useRouter();
 
   const { currentUser } = useSelector((state: any) => state.accountReducer);
@@ -37,7 +38,6 @@ export default function QuizDetailsPage() {
     loadQuiz();
     loadAttempts();
   }, []);
-
 
   if (!quiz) return <div className="p-4">Loading...</div>;
 
@@ -84,6 +84,16 @@ export default function QuizDetailsPage() {
         {isFaculty ? (
           <>
             <Button
+              variant={quiz.published ? "warning" : "success"}
+              className="border"
+              onClick={async () => {
+                await togglePublishQuiz(cid, qid);
+                loadQuiz(); // refresh UI after toggle
+              }}
+            >
+              {quiz.published ? "Unpublish" : "Publish"}
+            </Button>
+            <Button
               variant="light"
               className="border"
               onClick={() =>
@@ -102,7 +112,9 @@ export default function QuizDetailsPage() {
           </>
         ) : isAvailable ? (
           <Button
-            variant={attempts.length >= quiz.attemptsAllowed ? "secondary" : "primary"}
+            variant={
+              attempts.length >= quiz.attemptsAllowed ? "secondary" : "primary"
+            }
             onClick={() => router.push(`/Courses/${cid}/Quizzes/${qid}/Take`)}
             disabled={attempts.length >= quiz.attemptsAllowed}
           >
@@ -191,7 +203,7 @@ export default function QuizDetailsPage() {
         </div>
       </div>
       {/* ===================== ATTEMPT HISTORY (MINIMAL) ===================== */}
-{isStudent && (
+      {isStudent && (
         <div className="mt-4 p-3 border rounded bg-white">
           <h4 className="fw-bold mb-3">Attempt History</h4>
 

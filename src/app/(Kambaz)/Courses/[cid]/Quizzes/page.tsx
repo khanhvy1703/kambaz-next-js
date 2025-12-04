@@ -165,7 +165,7 @@ export default function QuizzesPage() {
 
         {filteredQuizzes.length === 0 && (
           <ListGroupItem className="text-center text-muted p-3">
-            No quizzes found.
+            No quizzes yet. Click + Quiz to add one.
           </ListGroupItem>
         )}
 
