@@ -12,8 +12,10 @@ export default function QuizDetailsPage() {
 
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const isFaculty = currentUser?.role === "FACULTY";
+  const isStudent = currentUser?.role === "STUDENT";
 
   const [quiz, setQuiz] = useState<any>(null);
+  const [attempts, setAttempts] = useState<any[]>([]);
 
   const SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
 
@@ -24,9 +26,18 @@ export default function QuizDetailsPage() {
     setQuiz(data);
   };
 
+  const loadAttempts = async () => {
+    const { data } = await axios.get(`${SERVER}/api/quizzes/${qid}/attempts`, {
+      withCredentials: true,
+    });
+    setAttempts(data);
+  };
+
   useEffect(() => {
     loadQuiz();
+    loadAttempts();
   }, []);
+
 
   if (!quiz) return <div className="p-4">Loading...</div>;
 
@@ -40,12 +51,11 @@ export default function QuizDetailsPage() {
     });
   };
 
-  // ===========================================================
-  // AVAILABILITY LOGIC
-  // ===========================================================
   const now = new Date();
   const availableAt = quiz.availableAt ? new Date(quiz.availableAt) : null;
-  const availableUntil = quiz.availableUntil ? new Date(quiz.availableUntil) : null;
+  const availableUntil = quiz.availableUntil
+    ? new Date(quiz.availableUntil)
+    : null;
 
   const isAvailable =
     quiz.published &&
@@ -55,15 +65,18 @@ export default function QuizDetailsPage() {
   const availabilityReason = () => {
     if (!quiz.published) return "This quiz is not published yet.";
     if (availableAt && now < availableAt)
-      return `This quiz is not available until ${formatDate(quiz.availableAt)}.`;
+      return `This quiz is not available until ${formatDate(
+        quiz.availableAt
+      )}.`;
     if (availableUntil && now > availableUntil)
       return "This quiz is now closed.";
     return null;
   };
 
-  // ===========================================================
-  // PAGE UI
-  // ===========================================================
+  const attemptsUsed = attempts.length;
+  const attemptLimit = quiz.multipleAttempts ? quiz.attemptsAllowed : 1;
+  const attemptsLeft = Math.max(attemptLimit - attemptsUsed, 0);
+
   return (
     <div className="p-4">
       {/* TOP BUTTONS */}
@@ -89,8 +102,9 @@ export default function QuizDetailsPage() {
           </>
         ) : isAvailable ? (
           <Button
-            variant="primary"
+            variant={attempts.length >= quiz.attemptsAllowed ? "secondary" : "primary"}
             onClick={() => router.push(`/Courses/${cid}/Quizzes/${qid}/Take`)}
+            disabled={attempts.length >= quiz.attemptsAllowed}
           >
             Start Quiz
           </Button>
@@ -176,6 +190,54 @@ export default function QuizDetailsPage() {
           <div className="col">{formatDate(quiz.availableUntil)}</div>
         </div>
       </div>
+      {/* ===================== ATTEMPT HISTORY (MINIMAL) ===================== */}
+{isStudent && (
+        <div className="mt-4 p-3 border rounded bg-white">
+          <h4 className="fw-bold mb-3">Attempt History</h4>
+
+          {/* Show Attempts Left */}
+          <div className="mb-2 text-muted">
+            Attempts Left:{" "}
+            <strong>
+              {quiz.multipleAttempts ? attemptsLeft : attemptsLeft}
+            </strong>
+          </div>
+
+          {attempts.length === 0 ? (
+            <div className="text-muted">No attempts yet.</div>
+          ) : (
+            <table className="table mb-0">
+              <thead>
+                <tr>
+                  <th style={{ width: "20%" }}></th>
+                  <th>Attempt</th>
+                  <th>Score</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {attempts
+                  .sort((a, b) => b.attemptNumber - a.attemptNumber)
+                  .map((att, idx) => (
+                    <tr key={att._id}>
+                      <td className="fw-bold text-danger">
+                        {idx === 0 ? "LATEST" : ""}
+                      </td>
+
+                      <td className="text-danger">
+                        Attempt {att.attemptNumber}
+                      </td>
+
+                      <td>
+                        {att.score} out of {quiz.points}
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
     </div>
   );
 }

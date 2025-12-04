@@ -1,10 +1,14 @@
 "use client";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, Form } from "react-bootstrap";
 
 export default function QuizRunner({ quiz, isFaculty }: any) {
+  const router = useRouter();
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<any>({});
+  const SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
 
   const q = quiz.questions[current];
 
@@ -13,7 +17,35 @@ export default function QuizRunner({ quiz, isFaculty }: any) {
   };
 
   const handleSubmit = async () => {
-    console.log("Submitting answers:", answers);
+    const startedAt = quiz.startedAt || new Date();
+
+    // SCORE CALCULATION
+    let score = 0;
+    quiz.questions.forEach((q: any) => {
+      const userAnswer = answers[q._id];
+
+      if (q.type === "MC" || q.type === "TF") {
+        if (userAnswer === q.correctAnswer[0]) score += q.points;
+      }
+
+      if (q.type === "FILL") {
+        const correct = q.correctAnswer.map((a: any) => a.toLowerCase().trim());
+        if (correct.includes(userAnswer?.toLowerCase().trim()))
+          score += q.points;
+      }
+    });
+
+    await axios.post(
+      `${SERVER}/api/quizzes/${quiz._id}/attempts`,
+      {
+        answers,
+        startedAt,
+        finishedAt: new Date(),
+      },
+      { withCredentials: true }
+    );
+
+    router.push(`/Courses/${quiz.course}/Quizzes/${quiz._id}`);
   };
 
   return (
