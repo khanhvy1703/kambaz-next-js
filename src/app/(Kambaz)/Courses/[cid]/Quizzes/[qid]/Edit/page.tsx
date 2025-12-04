@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Tabs, Tab, Button, Form, Row, Col } from "react-bootstrap";
 import axios from "axios";
+import QuestionsEditor from "./QuestionsEditor";
+
 
 export default function QuizEditorPage() {
   const { cid, qid } = useParams();
@@ -18,7 +20,6 @@ export default function QuizEditorPage() {
       withCredentials: true,
     });
 
-    // Ensure all fields exist to avoid undefined errors
     setQuiz({
       title: "",
       description: "",
@@ -51,7 +52,16 @@ export default function QuizEditorPage() {
   };
 
   const handleSave = async (publish = false) => {
-    const updated = { ...quiz, published: publish || quiz.published };
+    const totalPoints = quiz.questions?.reduce(
+      (sum: number, q: any) => sum + (q.points || 0),
+      0
+    );
+
+    const updated = {
+      ...quiz,
+      points: totalPoints,
+      published: publish || quiz.published,
+    };
 
     await axios.put(`${SERVER}/api/quizzes/${qid}`, updated, {
       withCredentials: true,
@@ -63,10 +73,7 @@ export default function QuizEditorPage() {
 
   return (
     <div className="p-4">
-      {/* Header Buttons */}
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h2 className="fw-bold">Edit Quiz</h2>
-
         <div className="d-flex gap-2">
           <Button
             variant="secondary"
@@ -312,13 +319,11 @@ export default function QuizEditorPage() {
         </Tab>
 
         {/* QUESTIONS TAB */}
-        <Tab
-          eventKey="questions"
-          title="Questions"
-          onClick={() =>
-            router.push(`/Courses/${cid}/Quizzes/${qid}/Questions`)
-          }
-        />
+        <Tab eventKey="questions" title="Questions">
+          <div className="p-3 border bg-white rounded">
+            <QuestionsEditor quiz={quiz} setQuiz={setQuiz} />
+          </div>
+        </Tab>
       </Tabs>
     </div>
   );
