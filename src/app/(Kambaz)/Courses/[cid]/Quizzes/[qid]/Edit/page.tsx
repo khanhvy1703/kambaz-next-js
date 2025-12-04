@@ -6,7 +6,6 @@ import { Tabs, Tab, Button, Form, Row, Col } from "react-bootstrap";
 import axios from "axios";
 import QuestionsEditor from "./QuestionsEditor";
 
-
 export default function QuizEditorPage() {
   const { cid, qid } = useParams();
   const router = useRouter();

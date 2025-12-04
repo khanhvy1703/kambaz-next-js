@@ -4,7 +4,7 @@ import axios from "axios";
 import QuizRunner from "../QuizRunner";
 import React from "react";
 
-export default function TakePage({ params }: any) {
+export default function PreviewPage({ params }: any) {
   const { qid } = React.use(params) as { qid: string };
   const [quiz, setQuiz] = useState<any>(null);
 
@@ -19,13 +19,9 @@ export default function TakePage({ params }: any) {
     loadQuiz();
   }, []);
 
-  const submitQuiz = (answers: any) => {
-    console.log("Submitted answers:", answers);
-  };
-
   if (!quiz) return <div className="p-4">Loading...</div>;
 
   return (
-    <QuizRunner quiz={quiz} isFaculty={false} onSubmit={submitQuiz} />
+    <QuizRunner quiz={quiz} isFaculty={true} onSubmit={() => {}} />
   );
 }

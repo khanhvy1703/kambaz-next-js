@@ -42,7 +42,6 @@ export default function QuizDetailsPage() {
 
   return (
     <div className="p-4">
-
       {/* TOP BUTTONS */}
       <div className="d-flex justify-content-end gap-2 mb-3">
         {isFaculty ? (
@@ -50,17 +49,19 @@ export default function QuizDetailsPage() {
             <Button
               variant="light"
               className="border"
-              onClick={() => router.push(`/Courses/${cid}/Quizzes/${qid}/Preview`)}
+              onClick={() =>
+                router.push(`/Courses/${cid}/Quizzes/${qid}/Preview`)
+              }
             >
               Preview
             </Button>
 
-              <Button
-                variant="secondary"
-                onClick={() => router.push(`/Courses/${cid}/Quizzes/${qid}/Edit`)}
-              >
-                Edit
-              </Button>
+            <Button
+              variant="secondary"
+              onClick={() => router.push(`/Courses/${cid}/Quizzes/${qid}/Edit`)}
+            >
+              Edit
+            </Button>
           </>
         ) : (
           <Button
@@ -73,13 +74,10 @@ export default function QuizDetailsPage() {
       </div>
 
       {/* TITLE */}
-      <h2 className="fw-bold mb-4">
-        {quiz.title}
-      </h2>
+      <h2 className="fw-bold mb-4">{quiz.title}</h2>
 
       {/* OUTER BORDER BOX */}
       <div className="border rounded p-4 bg-white">
-
         {/* TWO COLUMN PROPERTY TABLE */}
         <div className="row mb-4">
           <div className="col-5 text-end fw-bold">Quiz Type</div>
@@ -98,9 +96,13 @@ export default function QuizDetailsPage() {
           <div className="col-7 mt-2">{quiz.timeLimit ?? 20} Minutes</div>
 
           <div className="col-5 text-end fw-bold mt-2">Multiple Attempts</div>
-          <div className="col-7 mt-2">{quiz.multipleAttempts ? "Yes" : "No"}</div>
+          <div className="col-7 mt-2">
+            {quiz.multipleAttempts ? "Yes" : "No"}
+          </div>
 
-          <div className="col-5 text-end fw-bold mt-2">Show Correct Answers</div>
+          <div className="col-5 text-end fw-bold mt-2">
+            Show Correct Answers
+          </div>
           <div className="col-7 mt-2">
             {quiz.showCorrectAnswers ? "Immediately" : "No"}
           </div>
@@ -108,20 +110,20 @@ export default function QuizDetailsPage() {
           <div className="col-5 text-end fw-bold mt-2">Access Code</div>
           <div className="col-7 mt-2">{quiz.accessCode || "None"}</div>
 
-          <div className="col-5 text-end fw-bold mt-2">One Question at a Time</div>
+          <div className="col-5 text-end fw-bold mt-2">
+            One Question at a Time
+          </div>
           <div className="col-7 mt-2">
             {quiz.oneQuestionAtATime ? "Yes" : "No"}
           </div>
 
           <div className="col-5 text-end fw-bold mt-2">Webcam Required</div>
-          <div className="col-7 mt-2">
-            {quiz.webcamRequired ? "Yes" : "No"}
-          </div>
+          <div className="col-7 mt-2">{quiz.webcamRequired ? "Yes" : "No"}</div>
 
-          <div className="col-5 text-end fw-bold mt-2">Lock Questions After Answering</div>
-          <div className="col-7 mt-2">
-            {quiz.lockQuestions ? "Yes" : "No"}
+          <div className="col-5 text-end fw-bold mt-2">
+            Lock Questions After Answering
           </div>
+          <div className="col-7 mt-2">{quiz.lockQuestions ? "Yes" : "No"}</div>
         </div>
 
         <hr />

@@ -5,12 +5,14 @@ export default function QuestionsEditor({ quiz, setQuiz }: any) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [tempQuestion, setTempQuestion] = useState<any>(null);
 
+  // -------------------------------------------------------------
+  // ADD QUESTION
+  // -------------------------------------------------------------
   const addQuestion = () => {
     const newQ = {
       _id: crypto.randomUUID(),
-      title: "New Question",
       type: "MC",
-      text: "",
+      questionDescription: "",
       choices: [],
       correctAnswer: [],
       points: 1,
@@ -37,17 +39,24 @@ export default function QuestionsEditor({ quiz, setQuiz }: any) {
     const updated = [...quiz.questions];
     updated[editingIndex!] = tempQuestion;
     setQuiz({ ...quiz, questions: updated });
+
     setEditingIndex(null);
     setTempQuestion(null);
   };
 
+  // -------------------------------------------------------------
   const deleteQuestion = (index: number) => {
     const updated = quiz.questions.filter((_: any, i: number) => i !== index);
     setQuiz({ ...quiz, questions: updated });
+
+    if (editingIndex === index) {
+      setEditingIndex(null);
+      setTempQuestion(null);
+    }
   };
 
   // -------------------------------------------------------------
-  // AUTO-ADJUST STRUCTURE WHEN TYPE CHANGES
+  // Update TYPE + reset structure accordingly
   // -------------------------------------------------------------
   const updateType = (type: string) => {
     let updated = { ...tempQuestion, type };
@@ -87,24 +96,15 @@ export default function QuestionsEditor({ quiz, setQuiz }: any) {
             <>
               {/* HEADER BAR */}
               <div className="d-flex justify-content-between align-items-center mb-3">
-                <div className="d-flex gap-2 w-75">
-                  <Form.Control
-                    className="fw-bold"
-                    value={tempQuestion.title}
-                    onChange={(e) =>
-                      setTempQuestion({ ...tempQuestion, title: e.target.value })
-                    }
-                  />
-
-                  <Form.Select
-                    value={tempQuestion.type}
-                    onChange={(e) => updateType(e.target.value)}
-                  >
-                    <option value="MC">Multiple Choice</option>
-                    <option value="TF">True / False</option>
-                    <option value="FILL">Fill in Blank</option>
-                  </Form.Select>
-                </div>
+                <Form.Select
+                  value={tempQuestion.type}
+                  onChange={(e) => updateType(e.target.value)}
+                  className="w-50"
+                >
+                  <option value="MC">Multiple Choice</option>
+                  <option value="TF">True / False</option>
+                  <option value="FILL">Fill in Blank</option>
+                </Form.Select>
 
                 <div className="d-flex align-items-center gap-2">
                   <span className="text-muted">pts:</span>
@@ -122,16 +122,19 @@ export default function QuestionsEditor({ quiz, setQuiz }: any) {
                 </div>
               </div>
 
-              {/* QUESTION TEXT */}
+              {/* QUESTION DESCRIPTION */}
               <div className="mb-3">
                 <label className="fw-bold mb-1">Question:</label>
                 <Form.Control
                   as="textarea"
                   rows={3}
                   placeholder="Enter your question..."
-                  value={tempQuestion.text || ""}
+                  value={tempQuestion.questionDescription || ""}
                   onChange={(e) =>
-                    setTempQuestion({ ...tempQuestion, text: e.target.value })
+                    setTempQuestion({
+                      ...tempQuestion,
+                      questionDescription: e.target.value,
+                    })
                   }
                 />
               </div>
@@ -155,7 +158,6 @@ export default function QuestionsEditor({ quiz, setQuiz }: any) {
                             : "bg-light"
                         }`}
                       >
-                        {/* Radio correct */}
                         <Form.Check
                           type="radio"
                           name="mc-correct"
@@ -169,7 +171,6 @@ export default function QuestionsEditor({ quiz, setQuiz }: any) {
                           }
                         />
 
-                        {/* Choice input */}
                         <Form.Control
                           className="me-2"
                           value={choice}
@@ -183,7 +184,6 @@ export default function QuestionsEditor({ quiz, setQuiz }: any) {
                           }}
                         />
 
-                        {/* Delete choice */}
                         <Button
                           size="sm"
                           variant="outline-danger"
@@ -193,15 +193,13 @@ export default function QuestionsEditor({ quiz, setQuiz }: any) {
                                 (_: any, idx: number) => idx !== i
                               );
 
-                            const updatedCorrect =
-                              tempQuestion.correctAnswer[0] === choice
-                                ? [""]
-                                : tempQuestion.correctAnswer;
-
                             setTempQuestion({
                               ...tempQuestion,
                               choices: updatedChoices,
-                              correctAnswer: updatedCorrect,
+                              correctAnswer:
+                                tempQuestion.correctAnswer[0] === choice
+                                  ? [""]
+                                  : tempQuestion.correctAnswer,
                             });
                           }}
                         >
@@ -248,7 +246,10 @@ export default function QuestionsEditor({ quiz, setQuiz }: any) {
                         className="me-2"
                         checked={tempQuestion.correctAnswer[0] === val}
                         onChange={() =>
-                          setTempQuestion({ ...tempQuestion, correctAnswer: [val] })
+                          setTempQuestion({
+                            ...tempQuestion,
+                            correctAnswer: [val],
+                          })
                         }
                       />
                       <span className="fw-semibold">{val}</span>
@@ -332,7 +333,7 @@ export default function QuestionsEditor({ quiz, setQuiz }: any) {
             /* PREVIEW MODE */
             <div className="d-flex justify-content-between">
               <div>
-                <h5>{q.title}</h5>
+                <h5>Question {index + 1}</h5>
                 <div className="text-muted small">
                   {q.type} • {q.points} pts
                 </div>
