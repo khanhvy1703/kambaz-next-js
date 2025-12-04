@@ -15,7 +15,7 @@ export default function QuizDetailsPage() {
 
   const [quiz, setQuiz] = useState<any>(null);
 
-  const SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER_A6;
+  const SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
 
   const loadQuiz = async () => {
     const { data } = await axios.get(`${SERVER}/api/quizzes/${qid}`, {

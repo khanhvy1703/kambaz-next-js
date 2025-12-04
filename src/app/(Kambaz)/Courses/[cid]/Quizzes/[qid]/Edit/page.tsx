@@ -9,7 +9,7 @@ import QuestionsEditor from "./QuestionsEditor";
 export default function QuizEditorPage() {
   const { cid, qid } = useParams();
   const router = useRouter();
-  const SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER_A6;
+  const SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
 
   const [quiz, setQuiz] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("details");

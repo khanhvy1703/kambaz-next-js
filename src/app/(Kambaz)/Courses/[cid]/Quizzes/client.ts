@@ -3,7 +3,7 @@
 import axios from "axios";
 const axiosWithCredentials = axios.create({ withCredentials: true });
 
-const SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER_A6;
+const SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
 const QUIZZES_API = `${SERVER}/api/courses`;
 
 export const findQuizzesForCourse = async (cid: string) => {

@@ -4,7 +4,7 @@ import React, { use, useEffect, useState } from "react";
 import axios from "axios";
 import * as client from "./client";
 
-const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER_A6;
+const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
 
 export default function HttpClient() {
   const [welcomeOnClick, setWelcomeOnClick] = useState("");

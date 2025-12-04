@@ -8,7 +8,7 @@ export default function TakePage({ params }: any) {
   const { qid } = React.use(params) as { qid: string };
   const [quiz, setQuiz] = useState<any>(null);
 
-  const SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER_A6;
+  const SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
 
   const loadQuiz = async () => {
     const { data } = await axios.get(`${SERVER}/api/quizzes/${qid}`);
