@@ -7,7 +7,7 @@ export default function AccountNavigation() {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const pathname = usePathname();
 
-  const links = currentUser ? ["Profile"] : ["Signin", "Signup"];
+  const links = currentUser ? ["Profile" , "Groupinfo"] : ["Signin", "Signup", "Groupinfo"];
 
   return (
     <div id="wd-account-navigation" className="d-flex flex-column">
