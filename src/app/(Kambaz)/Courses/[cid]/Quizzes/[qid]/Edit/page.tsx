@@ -221,6 +221,22 @@ export default function QuizEditorPage() {
               onChange={(e) => update("multipleAttempts", e.target.checked)}
             />
 
+            {quiz.multipleAttempts && (
+              <div className="d-flex align-items-center ms-4 mt-2">
+                <span className="me-2">How Many Attempts:</span>
+
+                <Form.Control
+                  type="number"
+                  style={{ width: "80px" }}
+                  min={1}
+                  value={quiz.attemptsAllowed || 1}
+                  onChange={(e) =>
+                    setQuiz({ ...quiz, attemptsAllowed: Number(e.target.value) })
+                  }
+                />
+              </div>
+            )}
+
             {/* Show Correct Answers */}
             <Form.Check
               className="mb-2"

@@ -5,6 +5,8 @@ import { Button, Form } from "react-bootstrap";
 export default function QuizRunner({ quiz, isFaculty, onSubmit }: any) {
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<any>({});
+  const [submitted, setSubmitted] = useState(false);
+  const [result, setResult] = useState<any>(null);
 
   const q = quiz.questions[current];
 
@@ -12,6 +14,95 @@ export default function QuizRunner({ quiz, isFaculty, onSubmit }: any) {
     setAnswers({ ...answers, [q._id]: value });
   };
 
+  const handleSubmit = async () => {
+    if (isFaculty) return; // faculty cannot submit
+
+    const attempt = await onSubmit(answers); // returned from page handler
+    setResult(attempt);                      // contains score + answers
+    setSubmitted(true);
+  };
+
+  // ===========================================================
+  // R E S U L T   P A G E
+  // ===========================================================
+  if (submitted && result) {
+    return (
+      <div className="p-4 border rounded bg-white">
+
+        <h2 className="fw-bold mb-3">{quiz.title} — Results</h2>
+
+        <div className="alert alert-info">
+          You scored <strong>{result.score}</strong> out of{" "}
+          <strong>{quiz.points}</strong> points.
+        </div>
+
+        <hr />
+
+        <h4 className="fw-bold mb-3">Your Answers</h4>
+
+        {quiz.questions.map((qn: any, i: number) => {
+          const studentAns = result.answers[qn._id];
+          const correct =
+            qn.type === "FILL"
+              ? qn.correctAnswer.some(
+                  (x: string) =>
+                    x.toLowerCase().trim() === studentAns?.toLowerCase().trim()
+                )
+              : qn.correctAnswer[0] === studentAns;
+
+          return (
+            <div
+              key={qn._id}
+              className={`border rounded p-3 mb-3 ${
+                correct ? "border-success bg-success-subtle" : "border-danger bg-danger-subtle"
+              }`}
+            >
+              <div className="d-flex justify-content-between">
+                <h5 className="mb-2">Question {i + 1}</h5>
+                <div className="fw-bold">{qn.points} pts</div>
+              </div>
+
+              <div className="mb-2">{qn.questionDescription}</div>
+
+              {/* student answer */}
+              <div>
+                <strong>Your Answer:</strong>{" "}
+                <span className={correct ? "text-success" : "text-danger"}>
+                  {studentAns || "(No answer)"}
+                </span>
+              </div>
+
+              {/* correct answer */}
+              {!correct && (
+                <div className="mt-1">
+                  <strong>Correct Answer:</strong>{" "}
+                  <span className="text-success">
+                    {qn.type === "FILL"
+                      ? qn.correctAnswer.join(", ")
+                      : qn.correctAnswer[0]}
+                  </span>
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        <Button
+          className="mt-2"
+          variant="secondary"
+          onClick={() =>
+            (window.location.href = `/Courses/${quiz.course}/Quizzes/${quiz._id}`)
+          }
+        >
+          Back to Quiz Details
+        </Button>
+      </div>
+    );
+  }
+
+  // ===========================================================
+  // Q U I Z   T A K I N G   P A G E
+  // ===========================================================
   return (
     <div className="p-4 border rounded bg-white">
       {/* ====================== WARNING BANNER ====================== */}
@@ -28,14 +119,12 @@ export default function QuizRunner({ quiz, isFaculty, onSubmit }: any) {
       </div>
 
       <h5 className="fw-bold mb-3">Quiz Instructions</h5>
-      <div style={{border: '2px solid gray', marginBottom:'10px'}}></div>
+      <div style={{ border: "2px solid gray", marginBottom: "10px" }}></div>
 
       {/* ====================== QUESTION CARD ====================== */}
       <div className="border rounded p-3 mb-3">
         <div className="d-flex justify-content-between mb-2">
-          <div className="fw-bold">
-            Question {current + 1}
-          </div>
+          <div className="fw-bold">Question {current + 1}</div>
           <span className="text-muted small">{q.points} pts</span>
         </div>
 
@@ -80,7 +169,7 @@ export default function QuizRunner({ quiz, isFaculty, onSubmit }: any) {
         </div>
       </div>
 
-      {/* ====================== NEXT BUTTON ====================== */}
+      {/* ====================== NAVIGATION ====================== */}
       <div className="d-flex justify-content-end mb-3">
         {current < quiz.questions.length - 1 && (
           <Button
@@ -94,26 +183,21 @@ export default function QuizRunner({ quiz, isFaculty, onSubmit }: any) {
       </div>
 
       {/* ====================== CANVAS-STYLE FOOTER ====================== */}
-      <div
-        className="d-flex justify-content-between align-items-center
-                      border rounded bg-light px-3 py-2 mb-3"
-      >
-        {/* Saved timestamp */}
+      <div className="d-flex justify-content-between align-items-center border rounded bg-light px-3 py-2 mb-3">
         <div className="text-muted">
           Quiz saved at {new Date().toLocaleString()}
         </div>
 
-        {/* Submit button (faculty disabled) */}
         <Button
           variant="primary"
           disabled={isFaculty}
-          onClick={() => onSubmit(answers)}
+          onClick={handleSubmit}
         >
           Submit Quiz
         </Button>
       </div>
 
-      {/* ====================== KEEP EDITING (FACULTY ONLY) ====================== */}
+      {/* ====================== KEEP EDITING (FACULTY) ====================== */}
       {isFaculty && (
         <Button
           variant="light"
@@ -125,7 +209,8 @@ export default function QuizRunner({ quiz, isFaculty, onSubmit }: any) {
           🖉 Keep Editing This Quiz
         </Button>
       )}
-      {/* ====================== SIDEBAR QUESTION LIST ====================== */}
+
+      {/* ====================== QUESTION LIST ====================== */}
       <h5 className="fw-bold mb-2">Questions</h5>
 
       <ul className="list-unstyled ms-2">
@@ -134,13 +219,8 @@ export default function QuizRunner({ quiz, isFaculty, onSubmit }: any) {
           const isAnswered = answers[qn._id] && answers[qn._id] !== "";
 
           let color = "text-secondary";
-
-          if (isAnswered) {
-            color = "text-danger"; // red
-          }
-          if (isCurrent) {
-            color = "text-dark fw-bold text-decoration-underline";
-          }
+          if (isAnswered) color = "text-danger";
+          if (isCurrent) color = "text-dark fw-bold text-decoration-underline";
 
           return (
             <li

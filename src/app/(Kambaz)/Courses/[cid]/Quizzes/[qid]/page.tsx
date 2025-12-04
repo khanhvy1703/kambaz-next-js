@@ -99,6 +99,13 @@ export default function QuizDetailsPage() {
           <div className="col-7 mt-2">
             {quiz.multipleAttempts ? "Yes" : "No"}
           </div>
+          
+          {quiz.multipleAttempts && (
+            <>
+              <div className="col-5 text-end fw-bold mt-2">Attempt Limit</div>
+              <div className="col-7 mt-2">{quiz.attemptsAllowed}</div>
+            </>
+          )}
 
           <div className="col-5 text-end fw-bold mt-2">
             Show Correct Answers

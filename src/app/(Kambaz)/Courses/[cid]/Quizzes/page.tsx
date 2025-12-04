@@ -26,9 +26,10 @@ import { FaSearch } from "react-icons/fa";
 export default function QuizzesPage() {
   const { cid } = useParams();
   const router = useRouter();
-
   const { currentUser } = useSelector((state: any) => state.accountReducer);
+
   const isFaculty = currentUser?.role === "FACULTY";
+  const isStudent = currentUser?.role === "STUDENT";
 
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [filteredQuizzes, setFilteredQuizzes] = useState<any[]>([]);
@@ -37,15 +38,27 @@ export default function QuizzesPage() {
 
   const loadQuizzes = async () => {
     const data = await findQuizzesForCourse(cid as string);
-    setQuizzes(data);
-    setFilteredQuizzes(data);
+
+    let visible = data;
+
+    if (isStudent) {
+      visible = data.filter((q: any) => q.published);
+    }
+
+    visible = visible.sort((a: any, b: any) => {
+      const aTime = a?.availableAt ? new Date(a.availableAt).getTime() : 0;
+      const bTime = b?.availableAt ? new Date(b.availableAt).getTime() : 0;
+      return aTime - bTime;
+    });
+
+    setQuizzes(visible);
+    setFilteredQuizzes(visible);
   };
 
   useEffect(() => {
     loadQuizzes();
   }, []);
 
-  // 🔍 Search filtering
   useEffect(() => {
     const term = search.toLowerCase();
     setFilteredQuizzes(
@@ -53,7 +66,6 @@ export default function QuizzesPage() {
     );
   }, [search, quizzes]);
 
-  /** 🆕 UPDATED: Create quiz → go to EDITOR */
   const handleAddQuiz = async () => {
     const quiz = await createQuiz(cid as string);
     router.push(`/Courses/${cid}/Quizzes/${quiz._id}/Edit`);
@@ -76,11 +88,16 @@ export default function QuizzesPage() {
   const availabilityStatus = (quiz: any) => {
     const now = new Date();
 
-    if (quiz.availableAt && now < new Date(quiz.availableAt)) {
-      return `Not available until ${new Date(quiz.availableAt).toLocaleString()}`;
+    const availableAt = quiz.availableAt ? new Date(quiz.availableAt) : null;
+    const availableUntil = quiz.availableUntil
+      ? new Date(quiz.availableUntil)
+      : null;
+
+    if (availableAt && now < availableAt) {
+      return `Not available until ${availableAt.toLocaleString()}`;
     }
 
-    if (quiz.availableUntil && now > new Date(quiz.availableUntil)) {
+    if (availableUntil && now > availableUntil) {
       return "Closed";
     }
 
@@ -89,9 +106,7 @@ export default function QuizzesPage() {
 
   return (
     <div id="wd-quizzes-screen" className="p-3">
-      {/* Header w/Search + Add */}
       <div className="d-flex justify-content-between align-items-center mb-3">
-        {/* Search Bar */}
         <InputGroup style={{ width: "250px" }}>
           <InputGroup.Text>
             <FaSearch />
@@ -103,7 +118,6 @@ export default function QuizzesPage() {
           />
         </InputGroup>
 
-        {/* Add Quiz */}
         {isFaculty && (
           <Button className="btn-assignment-custom" onClick={handleAddQuiz}>
             + Quiz
@@ -111,7 +125,6 @@ export default function QuizzesPage() {
         )}
       </div>
 
-      {/* List Header */}
       <ListGroup className="rounded-0">
         <ListGroupItem className="p-3 fs-6 bg-light fw-bold d-flex justify-content-between align-items-center">
           <div className="d-flex align-items-center">
@@ -121,14 +134,12 @@ export default function QuizzesPage() {
           <span className="text-muted">{filteredQuizzes.length} items</span>
         </ListGroupItem>
 
-        {/* Empty State */}
         {filteredQuizzes.length === 0 && (
           <ListGroupItem className="text-center text-muted p-3">
             No quizzes found.
           </ListGroupItem>
         )}
 
-        {/* Quizzes */}
         {filteredQuizzes.map((quiz) => (
           <ListGroupItem
             key={quiz._id}
@@ -138,6 +149,7 @@ export default function QuizzesPage() {
               <BsGripVertical className="me-2 fs-5 mt-1" />
 
               <div>
+                {/* TITLE */}
                 <div
                   className="fw-bold text-dark"
                   role="button"
@@ -162,15 +174,17 @@ export default function QuizzesPage() {
                   </div>
                 )}
 
-                {/* Meta */}
+                {/* Meta Info */}
                 <div className="small mt-1 text-muted">
-                  {quiz.points ?? 0} pts • {quiz.questions?.length ?? 0} Questions
+                  {quiz.points ?? 0} pts • {quiz.questions?.length ?? 0}{" "}
+                  Questions
                 </div>
               </div>
             </div>
 
-            {/* Right Actions */}
+            {/* RIGHT ACTIONS */}
             <div className="text-nowrap d-flex align-items-center">
+              {/* PUBLISH ICON (faculty only) */}
               {isFaculty && (
                 <span
                   className="me-3 fs-5"
@@ -181,7 +195,7 @@ export default function QuizzesPage() {
                 </span>
               )}
 
-              {/* 3-dot menu */}
+              {/* THREE DOT MENU */}
               {isFaculty && (
                 <div className="position-relative">
                   <BsThreeDotsVertical
@@ -205,7 +219,9 @@ export default function QuizzesPage() {
                       <button
                         className="dropdown-item"
                         onClick={() =>
-                          router.push(`/Courses/${cid}/Quizzes/${quiz._id}/Edit`)
+                          router.push(
+                            `/Courses/${cid}/Quizzes/${quiz._id}/Edit`
+                          )
                         }
                       >
                         Edit
