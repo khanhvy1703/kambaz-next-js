@@ -1,0 +1,109 @@
+body   {
+  margin: 0;
+  padding: 0;
+}
+
+body * {
+  font-family: Arial,
+  Helvetica, sans-serif;
+}
+
+@media (min-width: 768px) {
+  #wd-kambaz .wd-main-content-offset {
+    padding-left: 140px !important;
+  }
+}
+
+.list-group.wd > .list-group-item.active {
+  color: black;
+  background-color: white;
+  border-left: 3px solid black !important;
+}
+
+#wd-modules-screen .card {
+  margin-bottom: 20px;
+}
+
+.list-group.wd > .list-group-item.active {
+  color: black;
+  background-color: white;
+  border-left: 3px solid black !important;
+}
+
+.assignment-item {
+  border: 1px solid #dee2e6;       
+  border-left: 5px solid #198754;  
+  border-radius: 0;                
+}
+
+.btn-group-custom {
+  background-color: #e2dede; 
+  color: #3e3e3e;           
+  border: 1px solid #ccc;
+}
+
+.btn-assignment-custom {
+  background-color: #d41b2c; 
+  color: white;            
+  border: 1px solid #f5c6cb;
+}
+
+.assignment-percent {
+  border: 1px solid #ccc;
+  border-radius: 999px;   
+  padding: 5px 16px;
+  font-size: 0.875rem;
+  color: #6c757d;        
+  background-color: #fff;
+}
+
+.wd-user-name {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #d9534f;
+  cursor: pointer;
+}
+
+.wd-details-header {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.wd-details-section {
+  margin-top: 15px;
+  margin-bottom: 20px;
+}
+
+.wd-detail-row {
+  display: flex;
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.wd-label {
+  width: 120px;
+  font-weight: 600;
+  color: #444;
+}
+
+.wd-value {
+  flex: 1;
+  color: #222;
+}
+
+.wd-edit-icon,
+.wd-save-icon {
+  font-size: 1.3rem;
+  margin-left: 8px;
+  cursor: pointer;
+  color: #d9534f;
+}
+
+.wd-edit-icon:hover,
+.wd-save-icon:hover {
+  color: #b52b27;
+}
+
+.wd-edit-name-input {
+  width: 250px;
+}

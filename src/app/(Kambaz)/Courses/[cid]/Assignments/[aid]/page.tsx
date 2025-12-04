@@ -1,118 +1,277 @@
+"use client";
+
+import { Form, Button, Row, Col } from "react-bootstrap";
+import { useParams, useRouter } from "next/navigation";
+import { useSelector, useDispatch } from "react-redux";
+import { addAssignment, updateAssignment } from "../reducer";
+import { v4 as uuidv4 } from "uuid";
+import { useState, useEffect } from "react";
+import * as client from "../client";
+
 export default function AssignmentEditor() {
+  const { cid, aid } = useParams();
+  const router = useRouter();
+  const dispatch = useDispatch();
+
+  const { assignments } = useSelector((state: any) => state.assignmentsReducer);
+  const existingAssignment = assignments.find((a: any) => a._id === aid);
+
+  // ✅ Default nested structure
+  const defaultOnlineEntryOptions = {
+    textEntry: false,
+    websiteURL: true,
+    mediaRecordings: false,
+    studentAnnotation: false,
+    fileUploads: false,
+  };
+
+  const defaultForm = {
+    _id: uuidv4(),
+    course: cid,
+    title: "",
+    description: "",
+    points: 100,
+    assignmentGroup: "ASSIGNMENTS",
+    displayGradeAs: "Percentage",
+    submissionType: "Online",
+    onlineEntryOptions: defaultOnlineEntryOptions,
+    assignTo: "Everyone",
+    dueDate: new Date().toISOString().slice(0, 16),
+    availableFrom: new Date().toISOString().slice(0, 16),
+    availableUntil: new Date().toISOString().slice(0, 16),
+  };
+
+  // ✅ Merge defaults + existing (fix undefined fields)
+  const mergedAssignment = existingAssignment
+    ? {
+        ...defaultForm,
+        ...existingAssignment,
+        onlineEntryOptions: {
+          ...defaultOnlineEntryOptions,
+          ...(existingAssignment.onlineEntryOptions || {}),
+        },
+        // normalize date fields for datetime-local
+        dueDate: existingAssignment.dueDate
+          ? new Date(existingAssignment.dueDate).toISOString().slice(0, 16)
+          : defaultForm.dueDate,
+        availableFrom: existingAssignment.availableFrom
+          ? new Date(existingAssignment.availableFrom)
+              .toISOString()
+              .slice(0, 16)
+          : defaultForm.availableFrom,
+        availableUntil: existingAssignment.availableUntil
+          ? new Date(existingAssignment.availableUntil)
+              .toISOString()
+              .slice(0, 16)
+          : defaultForm.availableUntil,
+      }
+    : defaultForm;
+
+  const [form, setForm] = useState<any>(mergedAssignment);
+
+  useEffect(() => {
+    if (existingAssignment) {
+      setForm(mergedAssignment);
+    }
+  }, [existingAssignment]);
+
+  const handleSave = async () => {
+    const updatedForm = {
+      ...form,
+      dueDate: new Date(form.dueDate).toISOString(),
+      availableFrom: new Date(form.availableFrom).toISOString(),
+      availableUntil: new Date(form.availableUntil).toISOString(),
+    };
+
+    let saved;
+
+    if (existingAssignment) {
+      saved = await client.updateAssignment(updatedForm);
+    } else {
+      saved = await client.createAssignment(cid as string, updatedForm);
+    }
+
+    dispatch(updateAssignment(saved));
+
+    router.push(`/Courses/${cid}/Assignments`);
+  };
+
+  const handleCancel = () => {
+    router.push(`/Courses/${cid}/Assignments`);
+  };
+
+  const handleCheckboxChange = (key: string) => {
+    setForm({
+      ...form,
+      onlineEntryOptions: {
+        ...form.onlineEntryOptions,
+        [key]: !form.onlineEntryOptions[key],
+      },
+    });
+  };
+
   return (
-    <div id="wd-assignments-editor">
-      <label htmlFor="wd-name">Assignment Name</label>
-      <input id="wd-name" value="A1 - ENV + HTML" />
-      <br />
-      <br />
-      <label htmlFor="wd-description">Description</label>
-      <textarea id="wd-description">
-        The assignment is available online. Submit a link to the landing page of
-        your application.
-      </textarea>
-      <br />
+    <div id="wd-assignments-editor" className="p-3">
+      <Form>
+        {/* Assignment Title */}
+        <Form.Group className="mb-3">
+          <Form.Label>Assignment Name</Form.Label>
+          <Form.Control
+            type="text"
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+          />
+        </Form.Group>
 
-      <table>
-        <tr>
-          <td align="right" valign="top">
-            <label htmlFor="wd-points">Points</label>
-          </td>
-          <td>
-            <input id="wd-points" type="number" value={100} />
-          </td>
-        </tr>
-        <tr>
-          <td align="right" valign="top">
-            <label htmlFor="wd-group">Assignment Group</label>
-          </td>
-          <td>
-            <select id="wd-group">
-              <option>ASSIGNMENTS</option>
-              <option>QUIZZES</option>
-              <option>EXAMS</option>
-              <option>PROJECT</option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td align="right" valign="top">
-            <label htmlFor="wd-display-grade-as">Display Grade as</label>
-          </td>
-          <td>
-            <select id="wd-display-grade-as">
-              <option>Percentage</option>
-              <option>Points</option>
-              <option>Letter Grade</option>
-              <option>Complete/Incomplete</option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td align="right" valign="top">
-            <label htmlFor="wd-submission-type">Submission Type</label>
-          </td>
-          <td>
-            <select id="wd-submission-type">
-              <option>Online</option>
-              <option>On Paper</option>
-              <option>No Submission</option>
-            </select>
-            <br />
-            <label>
-              <input id="wd-text-entry" type="checkbox" /> Text Entry
-            </label>
-            <br />
-            <label>
-              <input id="wd-website-url" type="checkbox" /> Website URL
-            </label>
-            <br />
-            <label>
-              <input id="wd-media-recordings" type="checkbox" /> Media Recordings
-            </label>
-            <br />
-            <label>
-              <input id="wd-student-annotation" type="checkbox" /> Student Annotation
-            </label>
-            <br />
-            <label>
-              <input id="wd-file-upload" type="checkbox" /> File Uploads
-            </label>
-          </td>
-        </tr>
-        <tr>
-          <td align="right" valign="top">
-            <label htmlFor="wd-assign-to">Assign To</label>
-          </td>
-          <td>
-            <input id="wd-assign-to" value="Everyone" />
-          </td>
-        </tr>
-        <tr>
-          <td align="right" valign="top">
-            <label htmlFor="wd-due-date">Due Date</label>
-          </td>
-          <td>
-            <input id="wd-due-date" type="date" />
-          </td>
-        </tr>
-        <tr>
-          <td align="right" valign="top">
-            <label htmlFor="wd-available-from">Available From</label>
-          </td>
-          <td>
-            <input id="wd-available-from" type="date" />
-          </td>
-        </tr>
+        {/* Description */}
+        <Form.Group className="mb-3">
+          <Form.Label>Description</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={6}
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+          />
+        </Form.Group>
 
-        <tr>
-          <td align="right" valign="top">
-            <label htmlFor="wd-available-until">Available Until</label>
-          </td>
-          <td>
-            <input id="wd-available-until" type="date" />
-          </td>
-        </tr>
-      </table>
+        <Row className="justify-content-end">
+          <Col sm={11}>
+            {/* Points */}
+            <Form.Group as={Row} className="mb-3">
+              <Form.Label column sm={2}>
+                Points
+              </Form.Label>
+              <Col sm={10}>
+                <Form.Control
+                  type="number"
+                  value={form.points}
+                  onChange={(e) =>
+                    setForm({ ...form, points: Number(e.target.value) })
+                  }
+                />
+              </Col>
+            </Form.Group>
+
+            {/* Assignment Group */}
+            <Form.Group as={Row} className="mb-3">
+              <Form.Label column sm={2}>
+                Assignment Group
+              </Form.Label>
+              <Col sm={10}>
+                <Form.Select
+                  value={form.assignmentGroup}
+                  onChange={(e) =>
+                    setForm({ ...form, assignmentGroup: e.target.value })
+                  }
+                >
+                  <option>ASSIGNMENTS</option>
+                  <option>QUIZZES</option>
+                  <option>EXAMS</option>
+                  <option>PROJECT</option>
+                </Form.Select>
+              </Col>
+            </Form.Group>
+
+            {/* Display Grade */}
+            <Form.Group as={Row} className="mb-3">
+              <Form.Label column sm={2}>
+                Display Grade as
+              </Form.Label>
+              <Col sm={10}>
+                <Form.Select
+                  value={form.displayGradeAs}
+                  onChange={(e) =>
+                    setForm({ ...form, displayGradeAs: e.target.value })
+                  }
+                >
+                  <option>Percentage</option>
+                  <option>Points</option>
+                  <option>Letter Grade</option>
+                  <option>Complete/Incomplete</option>
+                </Form.Select>
+              </Col>
+            </Form.Group>
+
+            {/* Assign Section */}
+            <Form.Group as={Row} className="mb-3">
+              <Form.Label column sm={2}>
+                Assign
+              </Form.Label>
+              <Col sm={10}>
+                <div className="mt-3 p-3 border rounded">
+                  <Form.Group as={Col} className="mb-3">
+                    <Form.Label className="fw-bold">Assign to</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={form.assignTo}
+                      onChange={(e) =>
+                        setForm({ ...form, assignTo: e.target.value })
+                      }
+                    />
+                  </Form.Group>
+
+                  <Form.Group as={Col} className="mb-3">
+                    <Form.Label className="fw-bold">Due</Form.Label>
+                    <Form.Control
+                      type="datetime-local"
+                      value={form.dueDate}
+                      onChange={(e) =>
+                        setForm({ ...form, dueDate: e.target.value })
+                      }
+                    />
+                  </Form.Group>
+
+                  <Row>
+                    <Col sm={6}>
+                      <Form.Group as={Col} className="mb-3">
+                        <Form.Label className="fw-bold">
+                          Available From
+                        </Form.Label>
+                        <Form.Control
+                          type="datetime-local"
+                          value={form.availableFrom}
+                          onChange={(e) =>
+                            setForm({
+                              ...form,
+                              availableFrom: e.target.value,
+                            })
+                          }
+                        />
+                      </Form.Group>
+                    </Col>
+
+                    <Col sm={6}>
+                      <Form.Group as={Col} className="mb-3">
+                        <Form.Label className="fw-bold">Until</Form.Label>
+                        <Form.Control
+                          type="datetime-local"
+                          value={form.availableUntil}
+                          onChange={(e) =>
+                            setForm({
+                              ...form,
+                              availableUntil: e.target.value,
+                            })
+                          }
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                </div>
+              </Col>
+            </Form.Group>
+          </Col>
+        </Row>
+
+        {/* Buttons */}
+        <div className="border-top pt-3 d-flex justify-content-end">
+          <Button variant="secondary" className="me-2" onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleSave}>
+            Save
+          </Button>
+        </div>
+      </Form>
     </div>
   );
 }
