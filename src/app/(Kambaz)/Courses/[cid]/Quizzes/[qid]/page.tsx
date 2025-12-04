@@ -40,6 +40,30 @@ export default function QuizDetailsPage() {
     });
   };
 
+  // ===========================================================
+  // AVAILABILITY LOGIC
+  // ===========================================================
+  const now = new Date();
+  const availableAt = quiz.availableAt ? new Date(quiz.availableAt) : null;
+  const availableUntil = quiz.availableUntil ? new Date(quiz.availableUntil) : null;
+
+  const isAvailable =
+    quiz.published &&
+    (!availableAt || now >= availableAt) &&
+    (!availableUntil || now <= availableUntil);
+
+  const availabilityReason = () => {
+    if (!quiz.published) return "This quiz is not published yet.";
+    if (availableAt && now < availableAt)
+      return `This quiz is not available until ${formatDate(quiz.availableAt)}.`;
+    if (availableUntil && now > availableUntil)
+      return "This quiz is now closed.";
+    return null;
+  };
+
+  // ===========================================================
+  // PAGE UI
+  // ===========================================================
   return (
     <div className="p-4">
       {/* TOP BUTTONS */}
@@ -63,12 +87,16 @@ export default function QuizDetailsPage() {
               Edit
             </Button>
           </>
-        ) : (
+        ) : isAvailable ? (
           <Button
             variant="primary"
             onClick={() => router.push(`/Courses/${cid}/Quizzes/${qid}/Take`)}
           >
             Start Quiz
+          </Button>
+        ) : (
+          <Button variant="secondary" disabled>
+            {availabilityReason()}
           </Button>
         )}
       </div>
@@ -76,9 +104,8 @@ export default function QuizDetailsPage() {
       {/* TITLE */}
       <h2 className="fw-bold mb-4">{quiz.title}</h2>
 
-      {/* OUTER BORDER BOX */}
+      {/* DETAILS CARD */}
       <div className="border rounded p-4 bg-white">
-        {/* TWO COLUMN PROPERTY TABLE */}
         <div className="row mb-4">
           <div className="col-5 text-end fw-bold">Quiz Type</div>
           <div className="col-7">{quiz.type ?? "Graded Quiz"}</div>
@@ -99,7 +126,7 @@ export default function QuizDetailsPage() {
           <div className="col-7 mt-2">
             {quiz.multipleAttempts ? "Yes" : "No"}
           </div>
-          
+
           {quiz.multipleAttempts && (
             <>
               <div className="col-5 text-end fw-bold mt-2">Attempt Limit</div>

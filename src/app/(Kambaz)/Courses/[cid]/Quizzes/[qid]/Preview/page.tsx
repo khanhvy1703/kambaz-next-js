@@ -22,6 +22,6 @@ export default function PreviewPage({ params }: any) {
   if (!quiz) return <div className="p-4">Loading...</div>;
 
   return (
-    <QuizRunner quiz={quiz} isFaculty={true} onSubmit={() => {}} />
+    <QuizRunner quiz={quiz} isFaculty={true}/>
   );
 }

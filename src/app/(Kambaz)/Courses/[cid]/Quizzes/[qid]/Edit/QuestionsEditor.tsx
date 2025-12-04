@@ -11,6 +11,7 @@ export default function QuestionsEditor({ quiz, setQuiz }: any) {
   const addQuestion = () => {
     const newQ = {
       _id: crypto.randomUUID(),
+      title: "New Question Title",
       type: "MC",
       questionDescription: "",
       choices: [],
@@ -23,10 +24,14 @@ export default function QuestionsEditor({ quiz, setQuiz }: any) {
     setTempQuestion(newQ);
   };
 
-  // -------------------------------------------------------------
   const editQuestion = (index: number) => {
+    const q = quiz.questions[index];
+
     setEditingIndex(index);
-    setTempQuestion({ ...quiz.questions[index] });
+    setTempQuestion({
+      title: q.title ?? "",
+      ...q,
+    });
   };
 
   const cancelEdit = () => {
@@ -34,7 +39,6 @@ export default function QuestionsEditor({ quiz, setQuiz }: any) {
     setTempQuestion(null);
   };
 
-  // -------------------------------------------------------------
   const saveQuestion = () => {
     const updated = [...quiz.questions];
     updated[editingIndex!] = tempQuestion;
@@ -44,7 +48,6 @@ export default function QuestionsEditor({ quiz, setQuiz }: any) {
     setTempQuestion(null);
   };
 
-  // -------------------------------------------------------------
   const deleteQuestion = (index: number) => {
     const updated = quiz.questions.filter((_: any, i: number) => i !== index);
     setQuiz({ ...quiz, questions: updated });
@@ -56,14 +59,14 @@ export default function QuestionsEditor({ quiz, setQuiz }: any) {
   };
 
   // -------------------------------------------------------------
-  // Update TYPE + reset structure accordingly
+  // Update TYPE + reset structure
   // -------------------------------------------------------------
   const updateType = (type: string) => {
     let updated = { ...tempQuestion, type };
 
     if (type === "MC") {
-      updated.choices = ["Option 1", "Option 2"];
-      updated.correctAnswer = ["Option 1"];
+      updated.choices = [];
+      updated.correctAnswer = [];
     }
 
     if (type === "TF") {
@@ -79,7 +82,6 @@ export default function QuestionsEditor({ quiz, setQuiz }: any) {
     setTempQuestion(updated);
   };
 
-  // -------------------------------------------------------------
   return (
     <div>
       <Button className="mb-3" onClick={addQuestion}>
@@ -94,7 +96,22 @@ export default function QuestionsEditor({ quiz, setQuiz }: any) {
         <div key={q._id} className="border rounded p-3 mb-3">
           {editingIndex === index ? (
             <>
-              {/* HEADER BAR */}
+              {/* TITLE FIELD */}
+              <div className="mb-3">
+                <Form.Control
+                  type="text"
+                  placeholder="Enter title..."
+                  value={tempQuestion.title}
+                  onChange={(e) =>
+                    setTempQuestion({
+                      ...tempQuestion,
+                      title: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              {/* TYPE + POINTS ROW */}
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <Form.Select
                   value={tempQuestion.type}
@@ -140,15 +157,14 @@ export default function QuestionsEditor({ quiz, setQuiz }: any) {
               </div>
 
               {/* ======================================================
-                        MULTIPLE CHOICE
-                 ====================================================== */}
+                      MULTIPLE CHOICE
+                   ====================================================== */}
               {tempQuestion.type === "MC" && (
                 <>
                   <div className="fw-bold mb-2">Answers:</div>
 
                   {tempQuestion.choices.map((choice: string, i: number) => {
                     const isCorrect = tempQuestion.correctAnswer[0] === choice;
-
                     return (
                       <div
                         key={i}
@@ -225,8 +241,8 @@ export default function QuestionsEditor({ quiz, setQuiz }: any) {
               )}
 
               {/* ======================================================
-                        TRUE / FALSE
-                 ====================================================== */}
+                      TRUE / FALSE
+                   ====================================================== */}
               {tempQuestion.type === "TF" && (
                 <>
                   <div className="fw-bold mb-2">Answers:</div>
@@ -252,19 +268,19 @@ export default function QuestionsEditor({ quiz, setQuiz }: any) {
                           })
                         }
                       />
-                      <span className="fw-semibold">{val}</span>
+                      <span>{val}</span>
                     </div>
                   ))}
                 </>
               )}
 
               {/* ======================================================
-                        FILL IN THE BLANK
-                 ====================================================== */}
+                      FILL IN THE BLANK
+                   ====================================================== */}
               {tempQuestion.type === "FILL" && (
                 <>
                   <div className="fw-bold mb-2">
-                    Possible Correct Answers (case-insensitive):
+                    Possible Correct Answers:
                   </div>
 
                   {tempQuestion.correctAnswer.map((ans: string, i: number) => (
@@ -290,9 +306,10 @@ export default function QuestionsEditor({ quiz, setQuiz }: any) {
                         size="sm"
                         variant="outline-danger"
                         onClick={() => {
-                          const updated = tempQuestion.correctAnswer.filter(
-                            (_: any, idx: number) => idx !== i
-                          );
+                          const updated =
+                            tempQuestion.correctAnswer.filter(
+                              (_: any, idx: number) => idx !== i
+                            );
                           setTempQuestion({
                             ...tempQuestion,
                             correctAnswer: updated,
@@ -330,10 +347,12 @@ export default function QuestionsEditor({ quiz, setQuiz }: any) {
               </div>
             </>
           ) : (
-            /* PREVIEW MODE */
+            // ---------------------------------------------------------
+            // PREVIEW MODE
+            // ---------------------------------------------------------
             <div className="d-flex justify-content-between">
               <div>
-                <h5>Question {index + 1}</h5>
+                <h5>{q.title || `Question ${index + 1}`}</h5>
                 <div className="text-muted small">
                   {q.type} • {q.points} pts
                 </div>

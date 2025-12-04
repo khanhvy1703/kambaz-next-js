@@ -19,13 +19,9 @@ export default function TakePage({ params }: any) {
     loadQuiz();
   }, []);
 
-  const submitQuiz = (answers: any) => {
-    console.log("Submitted answers:", answers);
-  };
-
   if (!quiz) return <div className="p-4">Loading...</div>;
 
   return (
-    <QuizRunner quiz={quiz} isFaculty={false} onSubmit={submitQuiz} />
+    <QuizRunner quiz={quiz} isFaculty={false}/>
   );
 }
